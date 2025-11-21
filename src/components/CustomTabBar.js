@@ -9,43 +9,41 @@ const { width } = Dimensions.get('window');
 export const CustomTabBar = ({ state, descriptors, navigation }) => {
     return (
         <View style={styles.container}>
-            <BlurView intensity={80} tint="light" style={styles.blurContainer}>
-                <View style={styles.tabBarContainer}>
-                    {state.routes.map((route, index) => {
-                        const { options } = descriptors[route.key];
-                        const isFocused = state.index === index;
+            <View style={styles.tabBarContainer}>
+                {state.routes.map((route, index) => {
+                    const { options } = descriptors[route.key];
+                    const isFocused = state.index === index;
 
-                        const onPress = () => {
-                            const event = navigation.emit({
-                                type: 'tabPress',
-                                target: route.key,
-                                canPreventDefault: true,
-                            });
+                    const onPress = () => {
+                        const event = navigation.emit({
+                            type: 'tabPress',
+                            target: route.key,
+                            canPreventDefault: true,
+                        });
 
-                            if (!isFocused && !event.defaultPrevented) {
-                                navigation.navigate(route.name);
-                            }
-                        };
+                        if (!isFocused && !event.defaultPrevented) {
+                            navigation.navigate(route.name);
+                        }
+                    };
 
-                        const onLongPress = () => {
-                            navigation.emit({
-                                type: 'tabLongPress',
-                                target: route.key,
-                            });
-                        };
+                    const onLongPress = () => {
+                        navigation.emit({
+                            type: 'tabLongPress',
+                            target: route.key,
+                        });
+                    };
 
-                        return (
-                            <TabBarButton
-                                key={route.key}
-                                onPress={onPress}
-                                onLongPress={onLongPress}
-                                isFocused={isFocused}
-                                options={options}
-                            />
-                        );
-                    })}
-                </View>
-            </BlurView>
+                    return (
+                        <TabBarButton
+                            key={route.key}
+                            onPress={onPress}
+                            onLongPress={onLongPress}
+                            isFocused={isFocused}
+                            options={options}
+                        />
+                    );
+                })}
+            </View>
         </View>
     );
 };
@@ -116,6 +114,7 @@ const styles = StyleSheet.create({
                 elevation: 10,
             },
         }),
+        backgroundColor: '#FFF5F2', // Added solid background for clean pill shape
     },
     blurContainer: {
         borderRadius: 30,
@@ -126,7 +125,7 @@ const styles = StyleSheet.create({
         height: 85,
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',// Semi-transparent for glass effect
+        //backgroundColor: 'rgba(255, 255, 255, 0.5)', // Removed to fix "white rectangle" issue
     },
     tabButton: {
         flex: 1,
