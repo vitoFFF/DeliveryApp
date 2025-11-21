@@ -3,6 +3,7 @@
 // Region: europe-west1
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getDatabase, ref, set, get, update, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAzd7H7osMun82EqK37UHjEn-dpX2JM2rI",
@@ -18,6 +19,17 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+const auth = getAuth(app);
+
+// Auth State Listener
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.href = 'login.html';
+    } else {
+        document.getElementById('adminUsername').textContent = user.email;
+        document.getElementById('logoutBtn').style.display = 'block';
+    }
+});
 
 // State Management
 let categoriesData = {};
@@ -192,6 +204,12 @@ function renderCategories() {
     Object.entries(categoriesData).forEach(([id, category]) => {
         const card = document.createElement('div');
         card.className = 'card';
+
+        // Calculate item count
+        const itemCount = Object.values(venuesData).filter(venue => {
+            return venue.categoryId === id || (venue.categories && venue.categories.includes(id));
+        }).length;
+
         card.onclick = (e) => {
             if (!e.target.closest('button')) {
                 navigateTo('venues', id, category.name);
@@ -202,8 +220,8 @@ function renderCategories() {
             <h3 class="card-title">${category.name}</h3>
             <div class="card-info">
                 <div class="card-info-item">
-                    <i data-lucide="tag"></i>
-                    <span>${id}</span>
+                    <i data-lucide="package"></i>
+                    <span>${itemCount} items</span>
                 </div>
             </div>
             <div class="card-actions">
@@ -256,7 +274,7 @@ async function saveCategory() {
     }
 
     try {
-        await set(ref(database, `deliveryApp/categories/${id}`), { id, name, icon, emoji });
+        await set(ref(database, `deliveryApp / categories / ${id} `), { id, name, icon, emoji });
         showToast(currentEditingId ? 'Category updated!' : 'Category added!');
         closeCategoryModal();
     } catch (error) {
@@ -268,7 +286,7 @@ window.deleteCategory = async function (id, event) {
     if (event) event.stopPropagation();
     if (!confirm('Delete this category?')) return;
     try {
-        await remove(ref(database, `deliveryApp/categories/${id}`));
+        await remove(ref(database, `deliveryApp / categories / ${id} `));
         showToast('Category deleted!');
     } catch (error) {
         showToast('Error: ' + error.message, true);
@@ -282,7 +300,14 @@ function renderVenues() {
     // Filter venues by selected category if applicable
     const venues = Object.entries(venuesData).filter(([_, venue]) => {
         if (!currentState.selectedCategory) return true;
-        return venue.categories && venue.categories.includes(currentState.selectedCategory.id);
+
+        // Support both old (numeric) and new (string) category ID structures
+        const categoryMatch = venue.categoryId === currentState.selectedCategory.id;
+
+        // Also check if tags array includes the category ID (for backward compatibility)
+        const tagMatch = venue.categories && venue.categories.includes(currentState.selectedCategory.id);
+
+        return categoryMatch || tagMatch;
     });
 
     if (venues.length === 0) {
@@ -337,7 +362,7 @@ window.openVenueModal = function () {
     Object.values(categoriesData).forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
-        option.textContent = `${cat.emoji} ${cat.name}`;
+        option.textContent = `${cat.emoji} ${cat.name} `;
         if (currentState.selectedCategory && currentState.selectedCategory.id === cat.id) {
             option.selected = true;
         }
@@ -371,7 +396,7 @@ window.editVenue = function (id, event) {
     Object.values(categoriesData).forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
-        option.textContent = `${cat.emoji} ${cat.name}`;
+        option.textContent = `${cat.emoji} ${cat.name} `;
         if (venue.categoryId === cat.id) {
             option.selected = true;
         }
@@ -382,7 +407,8 @@ window.editVenue = function (id, event) {
 };
 
 async function saveVenue() {
-    const id = currentEditingId || Date.now().toString();
+    // Use Firebase Push ID for new items
+    const id = currentEditingId || push(ref(database)).key;
     const name = document.getElementById('venueName').value;
     const categoryId = document.getElementById('venueCategoryId').value;
     const rating = parseFloat(document.getElementById('venueRating').value);
@@ -402,7 +428,7 @@ async function saveVenue() {
     const venueData = { id, categoryId, name, rating, deliveryTime, priceRange, image, website, categories };
 
     try {
-        await set(ref(database, `deliveryApp/venues/${id}`), venueData);
+        await set(ref(database, `deliveryApp / venues / ${id} `), venueData);
         showToast(currentEditingId ? 'Venue updated!' : 'Venue added!');
         closeVenueModal();
     } catch (error) {
@@ -414,11 +440,11 @@ window.deleteVenue = async function (id, event) {
     if (event) event.stopPropagation();
     if (!confirm('Delete this venue? Products will also be deleted.')) return;
     try {
-        await remove(ref(database, `deliveryApp/venues/${id}`));
+        await remove(ref(database, `deliveryApp / venues / ${id} `));
         // Also delete associated products
         const productsToDelete = Object.values(productsData).filter(p => p.restaurantId === id);
         for (const p of productsToDelete) {
-            await remove(ref(database, `deliveryApp/products/${p.id}`));
+            await remove(ref(database, `deliveryApp / products / ${p.id} `));
         }
         showToast('Venue deleted!');
     } catch (error) {
@@ -520,7 +546,8 @@ window.editProduct = function (id) {
 };
 
 async function saveProduct() {
-    const id = currentEditingId || Date.now().toString();
+    // Use Firebase Push ID for new items
+    const id = currentEditingId || push(ref(database)).key;
     const restaurantId = document.getElementById('productVenueId').value;
     const name = document.getElementById('productName').value;
     const description = document.getElementById('productDescription').value;
@@ -535,7 +562,7 @@ async function saveProduct() {
     const productData = { id, restaurantId, name, description, price, image };
 
     try {
-        await set(ref(database, `deliveryApp/products/${id}`), productData);
+        await set(ref(database, `deliveryApp / products / ${id} `), productData);
         showToast(currentEditingId ? 'Product updated!' : 'Product added!');
         closeProductModal();
     } catch (error) {
@@ -546,7 +573,7 @@ async function saveProduct() {
 window.deleteProduct = async function (id) {
     if (!confirm('Delete this product?')) return;
     try {
-        await remove(ref(database, `deliveryApp/products/${id}`));
+        await remove(ref(database, `deliveryApp / products / ${id} `));
         showToast('Product deleted!');
     } catch (error) {
         showToast('Error: ' + error.message, true);
@@ -580,7 +607,9 @@ function showToast(message, isError = false) {
 
 // Global Logout
 window.logout = function () {
-    sessionStorage.removeItem('adminLoggedIn');
-    sessionStorage.removeItem('adminUsername');
-    window.location.href = 'login.html';
+    signOut(auth).then(() => {
+        window.location.href = 'login.html';
+    }).catch((error) => {
+        console.error('Logout error:', error);
+    });
 };

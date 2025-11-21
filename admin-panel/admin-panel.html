@@ -11,6 +11,7 @@
     <!-- Firebase SDK (Compat version for file:// protocol) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 
 <body>
@@ -35,23 +36,7 @@
         </div>
     </header>
 
-    <!-- Auth Check Script -->
-    <script>
-        // Check if user is logged in
-        (function () {
-            const isLoggedIn = sessionStorage.getItem('adminLoggedIn');
-            const username = sessionStorage.getItem('adminUsername');
-
-            if (!isLoggedIn) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Show username and logout button
-            document.getElementById('adminUsername').textContent = `👤 ${username}`;
-            document.getElementById('logoutBtn').style.display = 'flex';
-        })();
-    </script>
+    <!-- Auth is handled by admin-script-compat.js -->
 
     <!-- Main Content -->
     <main class="container">

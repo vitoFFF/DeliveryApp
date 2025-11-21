@@ -16,6 +16,17 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+const auth = firebase.auth();
+
+// Auth State Listener
+auth.onAuthStateChanged((user) => {
+    if (!user) {
+        window.location.href = 'login.html';
+    } else {
+        document.getElementById('adminUsername').textContent = user.email;
+        document.getElementById('logoutBtn').style.display = 'flex';
+    }
+});
 
 // State Management
 let categoriesData = {};
@@ -99,6 +110,8 @@ function loadData() {
     database.ref('deliveryApp/venues').on('value', (snapshot) => {
         venuesData = snapshot.val() || {};
         if (currentState.view === 'venues') renderView();
+        // Re-render categories to update item counts
+        if (currentState.view === 'categories') renderView();
         updateProductVenueSelect(); // Update venue dropdown for products
     });
 
@@ -199,13 +212,18 @@ function renderCategories() {
             }
         });
 
+        // Calculate item count
+        const itemCount = Object.values(venuesData).filter(venue => {
+            return venue.categoryId === id || (venue.categories && venue.categories.includes(id));
+        }).length;
+
         card.innerHTML = `
             <div class="card-icon">${category.emoji || '📦'}</div>
             <h3 class="card-title">${category.name}</h3>
             <div class="card-info">
                 <div class="card-info-item">
-                    <i data-lucide="tag"></i>
-                    <span>${id}</span>
+                    <i data-lucide="package"></i>
+                    <span>${itemCount} items</span>
                 </div>
             </div>
             <div class="card-actions">
@@ -640,7 +658,9 @@ function showToast(message, isError = false) {
 
 // Global Logout
 window.logout = function () {
-    sessionStorage.removeItem('adminLoggedIn');
-    sessionStorage.removeItem('adminUsername');
-    window.location.href = 'login.html';
+    auth.signOut().then(() => {
+        window.location.href = 'login.html';
+    }).catch((error) => {
+        console.error('Logout error:', error);
+    });
 };

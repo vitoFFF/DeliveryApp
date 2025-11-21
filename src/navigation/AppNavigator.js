@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSelector, useDispatch } from 'react-redux';
 import { Text, View } from 'react-native';
 import { LoginScreen } from '../screens/LoginScreen';
+import { RegisterScreen } from '../screens/RegisterScreen';
 import { MainNavigator } from './MainNavigator';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrderStatusScreen } from '../screens/OrderStatusScreen';
@@ -31,11 +32,18 @@ export const AppNavigator = () => {
         <NavigationContainer>
             <Stack.Navigator>
                 {!isAuthenticated ? (
-                    <Stack.Screen
-                        name="Login"
-                        component={LoginScreen}
-                        options={{ headerShown: false }}
-                    />
+                    <>
+                        <Stack.Screen
+                            name="Login"
+                            component={LoginScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="Register"
+                            component={RegisterScreen}
+                            options={{ headerShown: false }}
+                        />
+                    </>
                 ) : (
                     <>
                         <Stack.Screen

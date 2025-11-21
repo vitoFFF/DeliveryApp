@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, TextInput, Button, Text } from 'react-native';
+import { View, StyleSheet, Alert, TextInput, Button, Text, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { loginUser } from '../store/authSlice';
 import { theme } from '../utils/theme';
 
-export const LoginScreen = () => {
+export const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('user@example.com');
     const [password, setPassword] = useState('password123');
     const dispatch = useDispatch();
@@ -64,6 +64,13 @@ export const LoginScreen = () => {
             <View style={styles.biometricButton}>
                 <Button title="Use Biometrics" onPress={authenticateBiometric} />
             </View>
+
+            <View style={styles.registerContainer}>
+                <Text>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                    <Text style={styles.registerLink}>Register</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -95,5 +102,14 @@ const styles = StyleSheet.create({
         color: 'red',
         marginBottom: theme.spacing.s,
         textAlign: 'center',
+    },
+    registerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: theme.spacing.l,
+    },
+    registerLink: {
+        color: theme.colors.primary,
+        fontWeight: 'bold',
     },
 });

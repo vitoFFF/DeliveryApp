@@ -119,8 +119,9 @@
 
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required autocomplete="username">
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" required autocomplete="email"
+                    placeholder="admin@example.com">
             </div>
 
             <div class="form-group">
@@ -132,43 +133,80 @@
         </form>
 
         <div class="info-box">
-            <strong>Default Credentials:</strong><br>
-            Username: admin<br>
-            Password: admin123
+            <strong>Firebase Login Required</strong><br>
+            Use your Firebase Email and Password
         </div>
     </div>
 
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     <script>
-        // Simple credential check (for demonstration)
-        // In production, use Firebase Authentication
-        const ADMIN_CREDENTIALS = {
-            username: 'admin',
-            password: 'admin123'
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzd7H7osMun82EqK37UHjEn-dpX2JM2rI",
+            authDomain: "delivery-eb503.firebaseapp.com",
+            databaseURL: "https://delivery-eb503-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "delivery-eb503",
+            storageBucket: "delivery-eb503.firebasestorage.app",
+            messagingSenderId: "708037846990",
+            appId: "1:708037846990:web:8e6824ccdece44b7eeed9f",
+            measurementId: "G-8HXQB157V7"
         };
 
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
-
-            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                // Store login state
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                sessionStorage.setItem('adminUsername', username);
-
-                // Redirect to admin panel
+        // Check if already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
                 window.location.href = 'admin-panel.html';
-            } else {
-                errorMessage.textContent = 'Invalid username or password';
-                errorMessage.classList.add('show');
-
-                setTimeout(() => {
-                    errorMessage.classList.remove('show');
-                }, 3000);
             }
         });
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const loginBtn = document.querySelector('.btn-login');
+
+            if (!email || !password) {
+                showError('Please enter both email and password');
+                return;
+            }
+
+            try {
+                loginBtn.textContent = 'Logging in...';
+                loginBtn.disabled = true;
+
+                await auth.signInWithEmailAndPassword(email, password);
+                // Redirect handled by onAuthStateChanged
+            } catch (error) {
+                console.error('Login error:', error);
+                let msg = 'Invalid email or password';
+                if (error.code === 'auth/user-not-found') msg = 'No user found with this email';
+                else if (error.code === 'auth/wrong-password') msg = 'Incorrect password';
+                else if (error.code === 'auth/invalid-email') msg = 'Invalid email format';
+                else if (error.code === 'auth/too-many-requests') msg = 'Too many failed attempts. Try again later.';
+
+                showError(msg);
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
+            }
+        });
+
+        function showError(msg) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = msg;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
     </script>
 </body>
 
