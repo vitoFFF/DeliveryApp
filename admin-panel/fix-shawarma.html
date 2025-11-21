@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fix Shawarma Category</title>
+</head>
+
+<body>
+    <h1>Fixing Shawarma Category...</h1>
+    <div id="status">Working...</div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzd7H7osMun82EqK37UHjEn-dpX2JM2rI",
+            authDomain: "delivery-eb503.firebaseapp.com",
+            databaseURL: "https://delivery-eb503-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "delivery-eb503",
+            storageBucket: "delivery-eb503.firebasestorage.app",
+            messagingSenderId: "708037846990",
+            appId: "1:708037846990:web:8e6824ccdece44b7eeed9f",
+            measurementId: "G-8HXQB157V7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const statusEl = document.getElementById('status');
+
+        async function fixCategory() {
+            try {
+                // Delete old category with trailing space
+                await remove(ref(database, 'deliveryApp/categories/shawarma-'));
+                statusEl.innerHTML += '<br>✓ Deleted old category "shawarma-"';
+
+                // Create new category without trailing space
+                const newCategory = {
+                    id: 'shawarma',
+                    name: 'Shawarma',
+                    icon: 'burrito', // You can change this
+                    emoji: '🌯'
+                };
+                await set(ref(database, 'deliveryApp/categories/shawarma'), newCategory);
+                statusEl.innerHTML += '<br>✓ Created new category "shawarma"';
+
+                // Update venue to reference new category ID
+                await set(ref(database, 'deliveryApp/venues/1763594820666/categories'), ['shawarma']);
+                statusEl.innerHTML += '<br>✓ Updated venue to reference "shawarma"';
+
+                statusEl.innerHTML += '<br><br><strong style="color: green;">✓ Done! You can close this page now.</strong>';
+            } catch (error) {
+                statusEl.innerHTML += '<br><strong style="color: red;">Error: ' + error.message + '</strong>';
+            }
+        }
+
+        fixCategory();
+    </script>
+</body>
+
+</html>

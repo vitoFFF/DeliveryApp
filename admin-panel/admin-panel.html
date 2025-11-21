@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery App - Admin Panel</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase SDK (Compat version for file:// protocol) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">
+                <i data-lucide="package" class="logo-icon"></i>
+                Delivery Admin Panel
+            </h1>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span id="adminUsername" style="color: #64748b; font-size: 0.875rem;"></span>
+                <button class="btn-logout" onclick="logout()" style="display: none;" id="logoutBtn">
+                    <i data-lucide="log-out"></i>
+                    Logout
+                </button>
+                <div class="connection-status" id="connectionStatus">
+                    <i data-lucide="wifi-off"></i>
+                    <span>Connecting...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Auth Check Script -->
+    <script>
+        // Check if user is logged in
+        (function () {
+            const isLoggedIn = sessionStorage.getItem('adminLoggedIn');
+            const username = sessionStorage.getItem('adminUsername');
+
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Show username and logout button
+            document.getElementById('adminUsername').textContent = `👤 ${username}`;
+            document.getElementById('logoutBtn').style.display = 'flex';
+        })();
+    </script>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb" id="breadcrumb">
+            <!-- Breadcrumb items will be injected here -->
+        </nav>
+
+        <!-- Section Header -->
+        <div class="section-header">
+            <h2 id="sectionTitle">Categories</h2>
+            <div class="actions">
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="Search categories...">
+                </div>
+                <button class="btn btn-primary" id="addBtn">
+                    <i data-lucide="plus"></i>
+                    Add New
+                </button>
+            </div>
+        </div>
+
+        <!-- Dynamic Content Area -->
+        <div id="dataGrid" class="grid">
+            <!-- Content will be injected here -->
+        </div>
+    </main>
+
+    <!-- Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">Add Category</h3>
+                <button class="btn-close" onclick="closeCategoryModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="categoryName" required>
+                </div>
+                <div class="form-group">
+                    <label>Icon (Font Awesome class) *</label>
+                    <input type="text" id="categoryIcon" placeholder="e.g., pizza-slice" required>
+                    <small>Examples: pizza-slice, fish, ice-cream, glass-water, cart-shopping</small>
+                </div>
+                <div class="form-group">
+                    <label>Emoji *</label>
+                    <input type="text" id="categoryEmoji" placeholder="e.g., 🍕" required maxlength="2">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Venue Modal -->
+    <div class="modal" id="venueModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="venueModalTitle">Add Venue</h3>
+                <button class="btn-close" onclick="closeVenueModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="venueForm">
+                <input type="hidden" id="venueId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="venueName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Rating *</label>
+                        <input type="number" id="venueRating" step="0.1" min="0" max="5" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Delivery Time *</label>
+                        <input type="text" id="venueDeliveryTime" placeholder="e.g., 25-35 min" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price Range *</label>
+                        <select id="venuePriceRange" required>
+                            <option value="$">$ - Budget</option>
+                            <option value="$$">$$ - Moderate</option>
+                            <option value="$$$">$$$ - Expensive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Image URL *</label>
+                    <input type="url" id="venueImage" placeholder="https://example.com/image.jpg" required>
+                </div>
+                <div class="form-group">
+                    <label>Website (Optional)</label>
+                    <input type="url" id="venueWebsite" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label>General Category *</label>
+                    <select id="venueCategoryId" required>
+                        <option value="">Select General Category</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="venueTags" placeholder="e.g., Fast Food, Burgers, Organic">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeVenueModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="productModalTitle">Add Product</h3>
+                <button class="btn-close" onclick="closeProductModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label>Venue *</label>
+                    <select id="productVenueId" required>
+                        <option value="">Select a venue</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="productDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Price *</label>
+                    <input type="number" id="productPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Image URL *</label>
+                    <input type="url" id="productImage" placeholder="https://example.com/image.jpg" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i data-lucide="check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Firebase SDK and App Logic -->
+    <script src="admin-script-compat.js"></script>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
