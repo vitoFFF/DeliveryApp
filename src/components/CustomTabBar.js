@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
                 elevation: 10,
             },
         }),
-        backgroundColor: '#FFF5F2', // Added solid background for clean pill shape
+        backgroundColor: 'white', // Added solid background for clean pill shape
     },
     blurContainer: {
         borderRadius: 30,

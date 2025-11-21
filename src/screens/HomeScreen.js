@@ -9,6 +9,12 @@ import { HorizontalList } from '../components/HorizontalList';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { theme } from '../utils/theme';
 
+// Helper to get random items from an array
+const getRandomItems = (arr, count) => {
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+};
+
 export const HomeScreen = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -46,9 +52,25 @@ export const HomeScreen = ({ navigation }) => {
         return filtered;
     }, [searchQuery, selectedCategory, venues]);
 
-    const specialOffers = useMemo(() => venues.filter(v => v.discount).slice(0, 3), [venues]);
-    const popularNow = useMemo(() => venues.filter(v => v.rating >= 4.8).slice(0, 3), [venues]);
-    const popularDrinks = useMemo(() => products.slice(0, 3), [products]);
+
+
+    const specialOffers = useMemo(() => {
+        if (!venues || venues.length === 0) return [];
+        return getRandomItems(venues, 5).map(v => ({
+            ...v,
+            discount: v.discount || `${Math.floor(Math.random() * 40 + 10)}% OFF` // Ensure some discount exists for display
+        }));
+    }, [venues]);
+
+    const popularNow = useMemo(() => {
+        if (!venues || venues.length === 0) return [];
+        return getRandomItems(venues, 5);
+    }, [venues]);
+
+    const popularDrinks = useMemo(() => {
+        if (!products || products.length === 0) return [];
+        return getRandomItems(products, 5);
+    }, [products]);
 
     const renderRestaurantCard = ({ item }) => (
         <TouchableOpacity
