@@ -98,11 +98,13 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options }) => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 25,
-        left: 20,
-        right: 20,
+        bottom: 20,
+        left: 10,  // Reduced from 20 to make nav bar wider
+        right: 10,  // Reduced from 20 to make nav bar wider
         borderRadius: 30,
         overflow: 'hidden',
+        borderWidth: 2.5,  // Added border contour
+        borderColor: 'rgba(0, 0, 0, 0.14)',  // Subtle border color
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -122,9 +124,10 @@ const styles = StyleSheet.create({
     },
     tabBarContainer: {
         flexDirection: 'row',
-        height: 85,
+        height: 80,  // Reduced from 85 to make buttons fit better
         justifyContent: 'space-around',
         alignItems: 'center',
+        paddingHorizontal: 8,  // Added padding for better spacing
         //backgroundColor: 'rgba(255, 255, 255, 0.5)', // Removed to fix "white rectangle" issue
     },
     tabButton: {
@@ -138,15 +141,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     iconContainer: {
-        width: 50,
-        height: 50,
-        borderRadius: 72,
+        width: 40,  // Reduced from 50 for better fit with 5 buttons
+        height: 40,  // Reduced from 50 for better fit with 5 buttons
+        borderRadius: 20,  // Adjusted to match new size
         alignItems: 'center',
         justifyContent: 'center',
     },
     activeIconContainer: {
         backgroundColor: theme.colors.primary,
-        borderRadius: 72,  // Match iconContainer for consistent rounded shape
+        borderRadius: 20,  // Adjusted to match new smaller size
         shadowColor: theme.colors.primary,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,

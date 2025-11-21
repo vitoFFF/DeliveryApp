@@ -1,8 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, ShoppingBag, User } from 'lucide-react-native';
+import { Text } from 'react-native';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CartScreen } from '../screens/CartScreen';
+import { FavouriteScreen } from '../screens/FavouriteScreen';
+import { AIChatScreen } from '../screens/AIChatScreen';
 import { HomeNavigator } from './HomeNavigator';
 import { CustomTabBar } from '../components/CustomTabBar';
 import { theme } from '../utils/theme';
@@ -18,8 +21,12 @@ export const MainNavigator = () => {
                 tabBarIcon: ({ color, size, focused }) => {
                     if (route.name === 'HomeTab') {
                         return <Home size={size} color={color} />;
+                    } else if (route.name === 'Favourite') {
+                        return <Text style={{ fontSize: size }}>🧡</Text>;
+                    } else if (route.name === 'AIChat') {
+                        return <Text style={{ fontSize: size }}>🔴</Text>;
                     } else if (route.name === 'Cart') {
-                        return <ShoppingBag size={size} color={color} />;
+                        return <Text style={{ fontSize: size }}>🛒</Text>;
                     } else if (route.name === 'Profile') {
                         return <User size={size} color={color} />;
                     }
@@ -31,6 +38,20 @@ export const MainNavigator = () => {
                 component={HomeNavigator}
                 options={{
                     tabBarLabel: 'Home',
+                }}
+            />
+            <Tab.Screen
+                name="Favourite"
+                component={FavouriteScreen}
+                options={{
+                    tabBarLabel: 'Favourite',
+                }}
+            />
+            <Tab.Screen
+                name="AIChat"
+                component={AIChatScreen}
+                options={{
+                    tabBarLabel: 'AI Chat',
                 }}
             />
             <Tab.Screen
