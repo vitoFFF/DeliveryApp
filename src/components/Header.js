@@ -17,7 +17,7 @@ export const Header = () => {
 
             <TouchableOpacity style={styles.profileButton}>
                 <View style={styles.avatarContainer}>
-                    <Text style={styles.avatarText}>JD</Text>
+                    <Text style={styles.avatarText}>VK</Text>
                 </View>
             </TouchableOpacity>
         </View>

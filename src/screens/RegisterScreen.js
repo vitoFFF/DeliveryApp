@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, Button, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, StatusBar } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../store/authSlice';
 import { theme } from '../utils/theme';
+import { TextInput, Button, Text, Title, Surface } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export const RegisterScreen = ({ navigation }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [validationError, setValidationError] = useState('');
 
     const dispatch = useDispatch();
@@ -36,93 +41,199 @@ export const RegisterScreen = ({ navigation }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Create Account</Text>
+        <SafeAreaView style={styles.safeArea}>
+            <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.container}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                    <View style={styles.headerContainer}>
+                        <View style={styles.iconContainer}>
+                            <MaterialCommunityIcons name="account-plus" size={50} color={theme.colors.primary} />
+                        </View>
+                        <Title style={styles.title}>Create Account</Title>
+                        <Text style={styles.subtitle}>Join us and start ordering today</Text>
+                    </View>
 
-            <TextInput
-                placeholder="Full Name"
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-                autoCapitalize="words"
-            />
+                    <Surface style={styles.formSurface}>
+                        <TextInput
+                            label="Full Name"
+                            value={name}
+                            onChangeText={setName}
+                            style={styles.input}
+                            mode="outlined"
+                            autoCapitalize="words"
+                            left={<TextInput.Icon icon="account" color={theme.colors.textSecondary} />}
+                            theme={{ colors: { primary: theme.colors.primary } }}
+                        />
 
-            <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-                autoCapitalize="none"
-                keyboardType="email-address"
-            />
+                        <TextInput
+                            label="Email"
+                            value={email}
+                            onChangeText={setEmail}
+                            style={styles.input}
+                            mode="outlined"
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                            left={<TextInput.Icon icon="email" color={theme.colors.textSecondary} />}
+                            theme={{ colors: { primary: theme.colors.primary } }}
+                        />
 
-            <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-                secureTextEntry
-            />
+                        <TextInput
+                            label="Password"
+                            value={password}
+                            onChangeText={setPassword}
+                            style={styles.input}
+                            secureTextEntry={!showPassword}
+                            mode="outlined"
+                            left={<TextInput.Icon icon="lock" color={theme.colors.textSecondary} />}
+                            right={
+                                <TextInput.Icon
+                                    icon={showPassword ? "eye-off" : "eye"}
+                                    onPress={() => setShowPassword(!showPassword)}
+                                    color={theme.colors.textSecondary}
+                                />
+                            }
+                            theme={{ colors: { primary: theme.colors.primary } }}
+                        />
 
-            <TextInput
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                style={styles.input}
-                secureTextEntry
-            />
+                        <TextInput
+                            label="Confirm Password"
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            style={styles.input}
+                            secureTextEntry={!showConfirmPassword}
+                            mode="outlined"
+                            left={<TextInput.Icon icon="lock-check" color={theme.colors.textSecondary} />}
+                            right={
+                                <TextInput.Icon
+                                    icon={showConfirmPassword ? "eye-off" : "eye"}
+                                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    color={theme.colors.textSecondary}
+                                />
+                            }
+                            theme={{ colors: { primary: theme.colors.primary } }}
+                        />
 
-            {validationError ? <Text style={styles.error}>{validationError}</Text> : null}
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+                        {(validationError || error) && (
+                            <View style={styles.errorContainer}>
+                                <MaterialCommunityIcons name="alert-circle" size={20} color={theme.colors.error} />
+                                <Text style={styles.errorText}>{validationError || error}</Text>
+                            </View>
+                        )}
 
-            <Button
-                title={isLoading ? "Creating Account..." : "Register"}
-                onPress={handleRegister}
-                disabled={isLoading}
-            />
+                        <Button
+                            mode="contained"
+                            onPress={handleRegister}
+                            loading={isLoading}
+                            disabled={isLoading}
+                            style={styles.registerButton}
+                            contentStyle={styles.registerButtonContent}
+                            labelStyle={styles.registerButtonLabel}
+                        >
+                            Register
+                        </Button>
+                    </Surface>
 
-            <View style={styles.loginContainer}>
-                <Text>Already have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                    <Text style={styles.loginLink}>Login</Text>
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                            <Text style={styles.loginLink}>Login</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: theme.colors.background,
+    },
     container: {
+        flex: 1,
+    },
+    scrollContent: {
         flexGrow: 1,
         padding: theme.spacing.l,
         justifyContent: 'center',
+    },
+    headerContainer: {
+        alignItems: 'center',
+        marginBottom: theme.spacing.xl,
+    },
+    iconContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         backgroundColor: theme.colors.surface,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: theme.spacing.m,
+        ...theme.shadows.medium,
     },
     title: {
-        fontSize: 24,
-        marginBottom: theme.spacing.xl,
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+        marginBottom: theme.spacing.xs,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: theme.colors.textSecondary,
         textAlign: 'center',
-        color: theme.colors.primary,
+    },
+    formSurface: {
+        padding: theme.spacing.l,
+        borderRadius: theme.borderRadius.l,
+        backgroundColor: theme.colors.surface,
+        ...theme.shadows.small,
     },
     input: {
         marginBottom: theme.spacing.m,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 5,
+        backgroundColor: theme.colors.surface,
     },
-    error: {
-        color: 'red',
-        marginBottom: theme.spacing.s,
-        textAlign: 'center',
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: theme.spacing.m,
+        padding: theme.spacing.s,
+        backgroundColor: '#FFEBEE',
+        borderRadius: theme.borderRadius.s,
     },
-    loginContainer: {
+    errorText: {
+        color: theme.colors.error,
+        marginLeft: theme.spacing.s,
+        flex: 1,
+    },
+    registerButton: {
+        marginTop: theme.spacing.s,
+        borderRadius: theme.borderRadius.m,
+        backgroundColor: theme.colors.primary,
+    },
+    registerButtonContent: {
+        height: 50,
+    },
+    registerButtonLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: theme.spacing.l,
+        marginTop: theme.spacing.xl,
+        marginBottom: theme.spacing.xl,
+    },
+    footerText: {
+        color: theme.colors.textSecondary,
+        fontSize: 16,
     },
     loginLink: {
         color: theme.colors.primary,
         fontWeight: 'bold',
+        fontSize: 16,
     },
 });
