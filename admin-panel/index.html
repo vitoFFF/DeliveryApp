@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery App - Admin Panel</title>
     <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="admin-mobile.css">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Firebase SDK (Compat version for file:// protocol) -->
@@ -23,7 +24,8 @@
                 Delivery Admin Panel
             </h1>
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <span id="adminUsername" style="color: #64748b; font-size: 0.875rem;"></span>
+                <span id="adminUsername" style="display: none;"></span>
+
                 <button class="btn-logout" onclick="logout()" style="display: none;" id="logoutBtn">
                     <i data-lucide="log-out"></i>
                     Logout
