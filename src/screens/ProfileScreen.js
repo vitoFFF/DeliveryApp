@@ -3,11 +3,14 @@ import { View, StyleSheet, ScrollView, Alert, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, Title, Subheading, Button, TextInput, List, Divider } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { logoutUser } from '../store/authSlice';
 import { theme } from '../utils/theme';
 import { seedDatabase } from '../utils/seedDatabase';
+import LanguageSelector from '../components/LanguageSelector';
 
 export const ProfileScreen = () => {
+    const { t } = useTranslation();
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const [isEditing, setIsEditing] = useState(false);
@@ -43,20 +46,20 @@ export const ProfileScreen = () => {
                             <Title>{name}</Title>
                             <Subheading>{email}</Subheading>
                             <Button mode="outlined" onPress={() => setIsEditing(true)} style={styles.button}>
-                                Edit Profile
+                                {t('profile.edit_profile')}
                             </Button>
                         </>
                     ) : (
                         <View style={styles.form}>
                             <TextInput
-                                label="Name"
+                                label={t('profile.name')}
                                 value={name}
                                 onChangeText={setName}
                                 style={styles.input}
                                 mode="outlined"
                             />
                             <TextInput
-                                label="Email"
+                                label={t('profile.email')}
                                 value={email}
                                 onChangeText={setEmail}
                                 style={styles.input}
@@ -65,10 +68,10 @@ export const ProfileScreen = () => {
                             />
                             <View style={styles.buttonRow}>
                                 <Button onPress={() => setIsEditing(false)} style={styles.button}>
-                                    Cancel
+                                    {t('common.cancel')}
                                 </Button>
                                 <Button mode="contained" onPress={handleSave} style={styles.button}>
-                                    Save
+                                    {t('common.save')}
                                 </Button>
                             </View>
                         </View>
@@ -78,26 +81,27 @@ export const ProfileScreen = () => {
                 <Divider style={styles.divider} />
 
                 <List.Section>
-                    <List.Subheader>Settings</List.Subheader>
+                    <List.Subheader>{t('profile.settings')}</List.Subheader>
+                    <LanguageSelector />
                     <List.Item
-                        title="Payment Methods"
+                        title={t('profile.payment_methods')}
                         left={(props) => <List.Icon {...props} icon="credit-card" />}
                         onPress={() => { }}
                     />
                     <List.Item
-                        title="Addresses"
+                        title={t('profile.addresses')}
                         left={(props) => <List.Icon {...props} icon="map-marker" />}
                         onPress={() => { }}
                     />
                     <List.Item
-                        title="Notifications"
+                        title={t('profile.notifications')}
                         left={(props) => <List.Icon {...props} icon="bell" />}
                         onPress={() => { }}
                     />
                     <Divider />
                     <List.Item
-                        title="Seed Database (Dev Only)"
-                        description="Overwrite Firebase with new schema"
+                        title={t('profile.seed_database')}
+                        description={t('profile.seed_database_description')}
                         left={(props) => <List.Icon {...props} icon="database-refresh" color={theme.colors.error} />}
                         onPress={handleSeedDatabase}
                         right={() => seeding && <Button loading>Seeding...</Button>}
@@ -106,7 +110,7 @@ export const ProfileScreen = () => {
 
                 <View style={styles.footer}>
                     <Button mode="contained" color="red" onPress={() => dispatch(logoutUser())}>
-                        Logout
+                        {t('profile.logout')}
                     </Button>
                 </View>
             </ScrollView>

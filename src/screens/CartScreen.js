@@ -2,10 +2,12 @@ import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { Title, Text, Button, List, Divider, IconButton } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { removeFromCart, selectCartItems, selectCartTotal, clearCart } from '../store/cartSlice';
 import { theme } from '../utils/theme';
 
 export const CartScreen = ({ navigation }) => {
+    const { t } = useTranslation();
     const items = useSelector(selectCartItems);
     const total = useSelector(selectCartTotal);
     const dispatch = useDispatch();
@@ -28,9 +30,9 @@ export const CartScreen = ({ navigation }) => {
     if (items.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <Title>Your Cart is Empty</Title>
+                <Title>{t('cart.empty')}</Title>
                 <Button mode="contained" onPress={() => navigation.navigate('HomeTab')} style={styles.button}>
-                    Browse Restaurants
+                    {t('cart.browse_restaurants')}
                 </Button>
             </View>
         );
@@ -38,7 +40,7 @@ export const CartScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Title style={styles.title}>Your Cart</Title>
+            <Title style={styles.title}>{t('cart.title')}</Title>
             <FlatList
                 data={items}
                 renderItem={renderItem}
@@ -48,7 +50,7 @@ export const CartScreen = ({ navigation }) => {
             />
             <View style={styles.footer}>
                 <View style={styles.totalRow}>
-                    <Title>Total:</Title>
+                    <Title>{t('common.total')}:</Title>
                     <Title>${total.toFixed(2)}</Title>
                 </View>
                 <Button
@@ -56,10 +58,10 @@ export const CartScreen = ({ navigation }) => {
                     onPress={() => navigation.navigate('Checkout')}
                     style={styles.checkoutButton}
                 >
-                    Proceed to Checkout
+                    {t('cart.proceed_to_checkout')}
                 </Button>
                 <Button onPress={() => dispatch(clearCart())} style={styles.clearButton} color="red">
-                    Clear Cart
+                    {t('cart.clear_cart')}
                 </Button>
             </View>
         </View>

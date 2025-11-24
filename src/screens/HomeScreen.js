@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Header } from '../components/Header';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryCarousel } from '../components/CategoryCarousel';
@@ -22,12 +23,13 @@ const getRandomItems = (arr, count) => {
 };
 
 export const HomeScreen = ({ navigation }) => {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedFilter, setSelectedFilter] = useState(null);
     const { categories, venues, products, loading, error } = useFirebaseData();
 
-    const filters = ['Rating 4.5+', 'Under 30 min', 'Price < $10', 'Dietary'];
+    const filters = [t('filters.rating'), t('filters.time'), t('filters.price'), t('filters.dietary')];
 
     const handleRestaurantPress = (restaurant) => {
         navigation.navigate('RestaurantDetail', { restaurant });
@@ -35,8 +37,8 @@ export const HomeScreen = ({ navigation }) => {
 
     // Prepare categories with "All" option
     const allCategories = useMemo(() => {
-        return [{ id: 'all', name: 'All', icon: 'apps', emoji: '🌟' }, ...categories];
-    }, [categories]);
+        return [{ id: 'all', name: t('common.all'), icon: 'apps', emoji: '🌟' }, ...categories];
+    }, [categories, t]);
 
     const handleCategorySelect = (categoryId) => {
         setSelectedCategory(categoryId);
@@ -160,7 +162,7 @@ export const HomeScreen = ({ navigation }) => {
             <SafeAreaView style={styles.safeArea}>
                 <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
                 <View style={[styles.container, styles.centerContent]}>
-                    <Text style={styles.errorText}>Failed to load data.</Text>
+                    <Text style={styles.errorText}>{t('common.failed_to_load')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -195,7 +197,7 @@ export const HomeScreen = ({ navigation }) => {
 
                             {/* 2. Meals Under $10 */}
                             <HorizontalList
-                                title="📉 Meals Under $10"
+                                title={t('home.meals_under')}
                                 data={mealsUnderX}
                                 renderItem={renderProductCard}
                             />
@@ -205,7 +207,7 @@ export const HomeScreen = ({ navigation }) => {
 
                             {/* 4. Picked for You */}
                             <HorizontalList
-                                title="✨ Picked for You"
+                                title={t('home.picked_for_you')}
                                 data={pickedForYou}
                                 renderItem={renderRestaurantCard}
                             />
@@ -215,7 +217,7 @@ export const HomeScreen = ({ navigation }) => {
 
                             {/* 6. Popular Now (Vertical List) */}
                             <VerticalList
-                                title="👇 Popular Now"
+                                title={t('home.popular_now')}
                                 data={popularNow}
                                 onItemPress={handleRestaurantPress}
                             />

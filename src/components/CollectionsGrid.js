@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../utils/theme';
 
 const { width } = Dimensions.get('window');
@@ -34,10 +35,12 @@ const COLLECTIONS = [
 ];
 
 export const CollectionsGrid = ({ onCollectionPress }) => {
+    const { t } = useTranslation();
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>🍱 Collections</Text>
+                <Text style={styles.title}>{t('home.collections')}</Text>
             </View>
             <View style={styles.grid}>
                 {COLLECTIONS.map((item) => (

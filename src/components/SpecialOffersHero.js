@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../utils/theme';
 
 const { width } = Dimensions.get('window');
@@ -32,9 +33,11 @@ const OFFERS = [
 ];
 
 export const SpecialOffersHero = ({ onOfferPress }) => {
+    const { t } = useTranslation();
+
     return (
         <View style={styles.container}>
-            <Text style={styles.sectionTitle}>🔥 Special Offers</Text>
+            <Text style={styles.sectionTitle}>{t('home.special_offers')}</Text>
             <ScrollView
                 horizontal
                 pagingEnabled

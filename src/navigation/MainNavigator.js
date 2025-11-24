@@ -22,9 +22,9 @@ export const MainNavigator = () => {
                     if (route.name === 'HomeTab') {
                         return <Home size={size} color={color} />;
                     } else if (route.name === 'Favourites') {
-                        return <Text style={{ fontSize: size }}>❤️</Text>;
+                        return <Text style={{ fontSize: size }}>💔</Text>;
                     } else if (route.name === 'Cart') {
-                        return <Text style={{ fontSize: size }}>🛒</Text>;
+                        return <Text style={{ fontSize: size }}>🌀</Text>;
                     } else if (route.name === 'Orders') {
                         return <Text style={{ fontSize: size }}>🧾</Text>;
                     } else if (route.name === 'Account') {

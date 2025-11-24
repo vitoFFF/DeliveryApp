@@ -1,18 +1,23 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Animated } from 'react-native';
 import { Search, X, Sparkles } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../utils/theme';
 
 export const SearchBar = ({
     value,
     onChangeText,
-    placeholder = 'Search for food, restaurants...',
-    aiPlaceholder = 'Ask AI anything...',
+    placeholder,
+    aiPlaceholder,
     onAIModeChange
 }) => {
+    const { t } = useTranslation();
     const [isFocused, setIsFocused] = React.useState(false);
     const [isAIMode, setIsAIMode] = React.useState(false);
     const aiGlowAnim = React.useRef(new Animated.Value(0)).current;
+
+    const defaultPlaceholder = placeholder || t('search.search_placeholder');
+    const defaultAiPlaceholder = aiPlaceholder || `${t('search.search_placeholder')} (AI)`;
 
     React.useEffect(() => {
         if (isAIMode) {
@@ -85,7 +90,7 @@ export const SearchBar = ({
                 style={styles.input}
                 value={value}
                 onChangeText={onChangeText}
-                placeholder={isAIMode ? aiPlaceholder : placeholder}
+                placeholder={isAIMode ? defaultAiPlaceholder : defaultPlaceholder}
                 placeholderTextColor={isAIMode ? theme.colors.primaryLight : '#9CA3AF'}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
@@ -123,7 +128,7 @@ export const SearchBar = ({
                             styles.aiText,
                             isAIMode && styles.aiTextActive
                         ]}>
-                            AI
+                            {t('search.ai_mode')}
                         </Text>
                     </View>
                 </Animated.View>

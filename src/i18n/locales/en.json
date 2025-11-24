@@ -1,0 +1,109 @@
+{
+    "common": {
+        "all": "All",
+        "search": "Search",
+        "loading": "Loading...",
+        "error": "Error",
+        "failed_to_load": "Failed to load data.",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "confirm": "Confirm",
+        "total": "Total"
+    },
+    "profile": {
+        "title": "Profile",
+        "edit_profile": "Edit Profile",
+        "name": "Name",
+        "email": "Email",
+        "logout": "Logout",
+        "settings": "Settings",
+        "payment_methods": "Payment Methods",
+        "addresses": "Addresses",
+        "notifications": "Notifications",
+        "seed_database": "Seed Database (Dev Only)",
+        "seed_database_description": "Overwrite Firebase with new schema"
+    },
+    "home": {
+        "title": "Home",
+        "special_offers": "Special Offers",
+        "meals_under": "📉 Meals Under 10💲",
+        "picked_for_you": "✨ Picked for You",
+        "popular_now": "👇 Popular Now",
+        "based_on_weather": "Based on Weather",
+        "collections": "Collections"
+    },
+    "cart": {
+        "title": "Your Cart",
+        "empty": "Your Cart is Empty",
+        "browse_restaurants": "Browse Restaurants",
+        "proceed_to_checkout": "Proceed to Checkout",
+        "clear_cart": "Clear Cart"
+    },
+    "checkout": {
+        "title": "Checkout",
+        "delivery_address": "Delivery Address",
+        "payment_method": "Payment Method",
+        "order_summary": "Order Summary",
+        "subtotal": "Subtotal",
+        "delivery_fee": "Delivery Fee",
+        "place_order": "Place Order"
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "confirm_password": "Confirm Password",
+        "full_name": "Full Name",
+        "sign_in": "Sign In",
+        "sign_up": "Sign Up",
+        "forgot_password": "Forgot Password?",
+        "have_account": "Already have an account?",
+        "no_account": "Don't have an account?",
+        "sign_in_google": "Sign in with Google",
+        "sign_in_facebook": "Sign in with Facebook",
+        "or": "OR"
+    },
+    "restaurant": {
+        "menu": "Menu",
+        "about": "About",
+        "reviews": "Reviews",
+        "delivery_time": "Delivery Time",
+        "minimum_order": "Minimum Order",
+        "add_to_cart": "Add to Cart"
+    },
+    "order": {
+        "order_status": "Order Status",
+        "order_placed": "Order Placed",
+        "preparing": "Preparing",
+        "on_the_way": "On the Way",
+        "delivered": "Delivered",
+        "track_order": "Track Order"
+    },
+    "filters": {
+        "rating": "Rating 4.5+",
+        "time": "Under 30 min",
+        "price": "Price < $10",
+        "dietary": "Dietary"
+    },
+    "language": {
+        "change_language": "Change Language",
+        "current_language": "Current Language: {{lng}}"
+    },
+    "search": {
+        "search_placeholder": "Search restaurants, cuisines...",
+        "ai_mode": "AI",
+        "no_results": "No results found"
+    },
+    "tabs": {
+        "home": "Home",
+        "favorites": "Favorites",
+        "cart": "Cart",
+        "profile": "Profile",
+        "ai_chat": "AI Chat"
+    }
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Image, StatusBar } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { loginUser } from '../store/authSlice';
 import { theme } from '../utils/theme';
@@ -9,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export const LoginScreen = ({ navigation }) => {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('user@example.com');
     const [password, setPassword] = useState('password123');
     const [showPassword, setShowPassword] = useState(false);
@@ -53,13 +55,13 @@ export const LoginScreen = ({ navigation }) => {
                         <View style={styles.iconContainer}>
                             <MaterialCommunityIcons name="chef-hat" size={60} color={theme.colors.primary} />
                         </View>
-                        <Title style={styles.title}>Welcome Back!</Title>
-                        <Text style={styles.subtitle}>Sign in to continue your delicious journey</Text>
+                        <Title style={styles.title}>{t('auth.login')}</Title>
+                        <Text style={styles.subtitle}>{t('common.welcome')}</Text>
                     </View>
 
                     <Surface style={styles.formSurface}>
                         <TextInput
-                            label="Email"
+                            label={t('auth.email')}
                             value={email}
                             onChangeText={setEmail}
                             style={styles.input}
@@ -70,7 +72,7 @@ export const LoginScreen = ({ navigation }) => {
                             theme={{ colors: { primary: theme.colors.primary } }}
                         />
                         <TextInput
-                            label="Password"
+                            label={t('auth.password')}
                             value={password}
                             onChangeText={setPassword}
                             style={styles.input}
@@ -103,7 +105,7 @@ export const LoginScreen = ({ navigation }) => {
                             contentStyle={styles.loginButtonContent}
                             labelStyle={styles.loginButtonLabel}
                         >
-                            Login
+                            {t('auth.sign_in')}
                         </Button>
 
                         <TouchableOpacity onPress={authenticateBiometric} style={styles.biometricButton}>
@@ -113,9 +115,9 @@ export const LoginScreen = ({ navigation }) => {
                     </Surface>
 
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>Don't have an account? </Text>
+                        <Text style={styles.footerText}>{t('auth.no_account')} </Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                            <Text style={styles.registerLink}>Register</Text>
+                            <Text style={styles.registerLink}>{t('auth.register')}</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

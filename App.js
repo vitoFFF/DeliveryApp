@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler';
+import './src/i18n'; // Initialize i18n
 import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
