@@ -8,6 +8,10 @@ import { RestaurantList } from '../components/RestaurantList';
 import { HorizontalList } from '../components/HorizontalList';
 import { SkeletonCard, SkeletonHorizontalCard, SkeletonCategory } from '../components/SkeletonLoader';
 import { FilterChips } from '../components/FilterChips';
+import { SpecialOffersHero } from '../components/SpecialOffersHero';
+import { WeatherSection } from '../components/WeatherSection';
+import { CollectionsGrid } from '../components/CollectionsGrid';
+import { VerticalList } from '../components/VerticalList';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { theme } from '../utils/theme';
 
@@ -58,13 +62,17 @@ export const HomeScreen = ({ navigation }) => {
     }, [searchQuery, selectedCategory, venues]);
 
 
+    // Data for new sections
+    // TODO: Implement real logic for these sections
+    const mealsUnderX = useMemo(() => {
+        if (!products || products.length === 0) return [];
+        // Mock logic: just take some random products
+        return getRandomItems(products, 6).map(p => ({ ...p, price: 9.99 })); // Force price for demo
+    }, [products]);
 
-    const specialOffers = useMemo(() => {
+    const pickedForYou = useMemo(() => {
         if (!venues || venues.length === 0) return [];
-        return getRandomItems(venues, 5).map(v => ({
-            ...v,
-            discount: v.discount || `${Math.floor(Math.random() * 40 + 10)}% OFF` // Ensure some discount exists for display
-        }));
+        return getRandomItems(venues, 5);
     }, [venues]);
 
     const popularNow = useMemo(() => {
@@ -72,10 +80,6 @@ export const HomeScreen = ({ navigation }) => {
         return getRandomItems(venues, 5);
     }, [venues]);
 
-    const popularDrinks = useMemo(() => {
-        if (!products || products.length === 0) return [];
-        return getRandomItems(products, 5);
-    }, [products]);
 
     const renderRestaurantCard = ({ item }) => (
         <TouchableOpacity
@@ -97,7 +101,7 @@ export const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
     );
 
-    const renderDrinkCard = ({ item }) => {
+    const renderProductCard = ({ item }) => {
         if (!item) return null;
         return (
             <TouchableOpacity style={styles.drinkCard}>
@@ -173,6 +177,7 @@ export const HomeScreen = ({ navigation }) => {
                     selectedFilter={selectedFilter}
                     onSelect={setSelectedFilter}
                 />
+
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.scrollContent}
@@ -183,31 +188,46 @@ export const HomeScreen = ({ navigation }) => {
                         onSelectCategory={handleCategorySelect}
                     />
 
-                    {selectedCategory === 'All' && !searchQuery && (
+                    {selectedCategory === 'All' && !searchQuery ? (
                         <>
+                            {/* 1. Special Offers (Hero Section) */}
+                            <SpecialOffersHero onOfferPress={(offer) => console.log('Offer pressed:', offer)} />
+
+                            {/* 2. Meals Under $10 */}
                             <HorizontalList
-                                title="🔥 Special Offers"
-                                data={specialOffers}
+                                title="📉 Meals Under $10"
+                                data={mealsUnderX}
+                                renderItem={renderProductCard}
+                            />
+
+                            {/* 3. Based on Weather */}
+                            <WeatherSection onFoodPress={(food) => console.log('Weather food pressed:', food)} />
+
+                            {/* 4. Picked for You */}
+                            <HorizontalList
+                                title="✨ Picked for You"
+                                data={pickedForYou}
                                 renderItem={renderRestaurantCard}
                             />
-                            <HorizontalList
-                                title="📈 Popular Now"
+
+                            {/* 5. Collections */}
+                            <CollectionsGrid onCollectionPress={(collection) => console.log('Collection pressed:', collection)} />
+
+                            {/* 6. Popular Now (Vertical List) */}
+                            <VerticalList
+                                title="👇 Popular Now"
                                 data={popularNow}
-                                renderItem={renderRestaurantCard}
-                            />
-                            <HorizontalList
-                                title="🥤 Popular Products"
-                                data={popularDrinks}
-                                renderItem={renderDrinkCard}
+                                onItemPress={handleRestaurantPress}
                             />
                         </>
+                    ) : (
+                        // Show standard list when searching or filtering by category
+                        <RestaurantList
+                            restaurants={filteredVenues}
+                            onRestaurantPress={handleRestaurantPress}
+                            markFirstAsFeatured={!searchQuery && selectedCategory === 'All'}
+                        />
                     )}
-
-                    <RestaurantList
-                        restaurants={filteredVenues}
-                        onRestaurantPress={handleRestaurantPress}
-                        markFirstAsFeatured={!searchQuery && selectedCategory === 'All'}
-                    />
                 </ScrollView>
             </View>
         </SafeAreaView>
