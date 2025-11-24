@@ -7,6 +7,7 @@ import { CategoryCarousel } from '../components/CategoryCarousel';
 import { RestaurantList } from '../components/RestaurantList';
 import { HorizontalList } from '../components/HorizontalList';
 import { SkeletonCard, SkeletonHorizontalCard, SkeletonCategory } from '../components/SkeletonLoader';
+import { FilterChips } from '../components/FilterChips';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { theme } from '../utils/theme';
 
@@ -19,7 +20,10 @@ const getRandomItems = (arr, count) => {
 export const HomeScreen = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedFilter, setSelectedFilter] = useState(null);
     const { categories, venues, products, loading, error } = useFirebaseData();
+
+    const filters = ['Rating 4.5+', 'Under 30 min', 'Price < $10', 'Dietary'];
 
     const handleRestaurantPress = (restaurant) => {
         navigation.navigate('RestaurantDetail', { restaurant });
@@ -164,6 +168,11 @@ export const HomeScreen = ({ navigation }) => {
             <View style={styles.container}>
                 <Header />
                 <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+                <FilterChips
+                    filters={filters}
+                    selectedFilter={selectedFilter}
+                    onSelect={setSelectedFilter}
+                />
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.scrollContent}

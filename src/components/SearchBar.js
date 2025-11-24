@@ -76,7 +76,7 @@ export const SearchBar = ({
             <View style={styles.searchIconWrapper}>
                 <Search
                     size={20}
-                    color={isAIMode ? '#8B5CF6' : (isFocused ? theme.colors.primary : '#6B7280')}
+                    color={isAIMode ? theme.colors.primary : (isFocused ? theme.colors.primary : '#6B7280')}
                     strokeWidth={2.5}
                 />
             </View>
@@ -86,10 +86,10 @@ export const SearchBar = ({
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={isAIMode ? aiPlaceholder : placeholder}
-                placeholderTextColor={isAIMode ? '#A78BFA' : '#9CA3AF'}
+                placeholderTextColor={isAIMode ? theme.colors.primaryLight : '#9CA3AF'}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                selectionColor={isAIMode ? '#8B5CF6' : theme.colors.primary}
+                selectionColor={theme.colors.primary}
             />
 
             {/* AI Mode Toggle Button */}
@@ -115,7 +115,7 @@ export const SearchBar = ({
                     ]}>
                         <Sparkles
                             size={22}
-                            color={isAIMode ? '#FFFFFF' : '#8B5CF6'}
+                            color={isAIMode ? '#FFFFFF' : theme.colors.primary}
                             strokeWidth={2.5}
                             fill={isAIMode ? '#FFFFFF' : 'transparent'}
                         />
@@ -174,9 +174,9 @@ const styles = StyleSheet.create({
         transform: [{ scale: 1.01 }], // Subtle pop on focus
     },
     containerAIMode: {
-        borderColor: '#8B5CF6',
-        backgroundColor: '#FDFBFF',
-        shadowColor: '#8B5CF6',
+        borderColor: theme.colors.primary,
+        backgroundColor: '#FFF9F8',
+        shadowColor: theme.colors.primary,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.25,
         shadowRadius: 16,
@@ -209,34 +209,42 @@ const styles = StyleSheet.create({
         right: -8,
         bottom: -8,
         borderRadius: 24,
-        backgroundColor: '#8B5CF6',
+        backgroundColor: theme.colors.primary,
         opacity: 0.3,
     },
     aiChip: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 20,
-        backgroundColor: '#F5F3FF',
-        borderWidth: 1,
-        borderColor: '#E9D5FF',
+        paddingHorizontal: 14,
+        paddingVertical: 9,
+        borderRadius: 22,
+        backgroundColor: '#FFF0ED',
+        borderWidth: 1.5,
+        borderColor: '#FFD1C7',
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 4,
+        elevation: 2,
     },
     aiChipActive: {
-        backgroundColor: '#8B5CF6',
-        borderColor: '#7C3AED',
-        shadowColor: '#8B5CF6',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 6,
+        backgroundColor: theme.colors.primaryDark,
+        borderColor: '#D84315',
+        shadowColor: theme.colors.primaryDark,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.45,
+        shadowRadius: 12,
+        elevation: 8,
     },
     aiText: {
         fontSize: 13,
-        fontWeight: '700',
-        color: '#8B5CF6',
-        letterSpacing: 0.5,
+        fontWeight: '800',
+        color: theme.colors.primaryDark,
+        letterSpacing: 0.6,
+        textShadowColor: 'rgba(229, 80, 46, 0.1)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 1,
     },
     aiTextActive: {
         color: '#FFFFFF',

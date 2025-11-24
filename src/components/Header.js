@@ -56,10 +56,12 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     deliverToText: {
-        fontSize: 12,
-        color: theme.colors.textSecondary,
+        fontSize: 11,
+        color: '#9CA3AF',
         marginBottom: 4,
-        fontWeight: '500',
+        fontWeight: '600',
+        letterSpacing: 0.8,
+        textTransform: 'uppercase',
     },
     locationSelector: {
         flexDirection: 'row',
@@ -69,10 +71,14 @@ const styles = StyleSheet.create({
         marginRight: 4,
     },
     locationText: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#111827',
+        fontSize: 17,
+        fontWeight: '800',
+        color: '#1F2937',
         marginRight: 4,
+        letterSpacing: -0.2,
+        textShadowColor: 'rgba(0, 0, 0, 0.05)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
     },
     profileButton: {
         padding: 4,

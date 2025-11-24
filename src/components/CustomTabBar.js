@@ -12,7 +12,7 @@ const TabBarShape = () => {
     const center = tabWidth / 2;
 
     // ===== CUTOUT PARAMETERS - Easy to configure =====
-    const cutoutWidth = 70;            // Width of the cutout opening
+    const cutoutWidth = 74;            // Slightly wider for breathing room
     const cutoutDepth = 52;             // How deep the arc goes down
     const cutoutCornerRadius = 22;       // Smoothness entering the cutout
     const topCornerRadius = 40;         // Top corners of tab bar
@@ -50,18 +50,12 @@ const TabBarShape = () => {
 
     return (
         <Svg width={tabWidth} height={80} viewBox={`0 0 ${tabWidth} 80`} style={StyleSheet.absoluteFill}>
-            {/* Main tab bar shape */}
-            <Path d={d} fill="white" />
-            {/* Subtle top border for definition */}
+            {/* Main tab bar shape - LIGHT THEME WITH BORDER */}
             <Path
-                d={`M ${topCornerRadius} 0 L ${leftX - cutoutCornerRadius} 0`}
-                stroke="rgba(0,0,0,0.08)"
-                strokeWidth="1"
-            />
-            <Path
-                d={`M ${rightX + cutoutCornerRadius} 0 L ${tabWidth - topCornerRadius} 0`}
-                stroke="rgba(0,0,0,0.08)"
-                strokeWidth="1"
+                d={d}
+                fill="white"
+                stroke="#E5E7EB" // Light gray border for definition
+                strokeWidth="1.5"
             />
         </Svg>
     );
@@ -141,7 +135,7 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
                 ]}>
                     {options.tabBarIcon &&
                         options.tabBarIcon({
-                            color: isFocused ? theme.colors.surface : theme.colors.textSecondary,
+                            color: isFocused ? (isBigButton ? '#FFFFFF' : theme.colors.primary) : '#9CA3AF',
                             size: isBigButton ? 32 : 24,
                             focused: isFocused,
                         })}
@@ -155,19 +149,19 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 20,
+        bottom: 24,
         left: 10,
         right: 10,
         height: 80,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.35,      // Enhanced from 0.25
-                shadowRadius: 25,         // Enhanced from 20
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.15,      // Increased opacity for visibility
+                shadowRadius: 24,         // Larger radius for "float"
             },
             android: {
-                elevation: 12,            // Enhanced from 10
+                elevation: 12,
             },
         }),
     },
@@ -195,7 +189,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    // BIG CART BUTTON - 60x60px with premium shadow
+    // BIG CART BUTTON
     bigIconContainer: {
         width: 60,
         height: 60,
@@ -203,26 +197,21 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.primary,
         marginTop: -45,
         borderWidth: 4,
-        borderColor: '#FFFFFF',
-        // Enhanced layered shadow for 3D floating effect
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.3,
-        shadowRadius: 20,
-        elevation: 16,
+        borderColor: '#FFFFFF', // White border to match tab bar
+        // Enhanced layered shadow
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+        elevation: 12,
     },
     activeIconContainer: {
-        backgroundColor: theme.colors.primary,
+        backgroundColor: '#F3F4F6', // Light gray background for active
         borderRadius: 20,
-        shadowColor: theme.colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 5,
     },
     activeBigIconContainer: {
         transform: [{ scale: 1.05 }],
-        shadowOpacity: 0.5,
+        shadowOpacity: 0.6,
         shadowRadius: 20,
         elevation: 15,
     },
