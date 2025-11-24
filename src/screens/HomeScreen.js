@@ -188,7 +188,7 @@ export const HomeScreen = ({ navigation }) => {
                         onSelectCategory={handleCategorySelect}
                     />
 
-                    {selectedCategory === 'All' && !searchQuery ? (
+                    {(selectedCategory === 'All' || selectedCategory === 'all') && !searchQuery ? (
                         <>
                             {/* 1. Special Offers (Hero Section) */}
                             <SpecialOffersHero onOfferPress={(offer) => console.log('Offer pressed:', offer)} />

@@ -8,11 +8,14 @@ const CategoryItem = ({ category, isSelected, onPress, index }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
+        fadeAnim.setValue(0);
+        slideAnim.setValue(30);
+
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
                 duration: 400,
-                delay: index * 50, // Staggered delay
+                delay: index * 50,
                 useNativeDriver: true,
             }),
             Animated.spring(slideAnim, {
@@ -23,11 +26,11 @@ const CategoryItem = ({ category, isSelected, onPress, index }) => {
                 useNativeDriver: true,
             }),
         ]).start();
-    }, []);
+    }, [index, fadeAnim, slideAnim]);
 
     const handlePressIn = () => {
         Animated.spring(scaleAnim, {
-            toValue: 0.95,
+            toValue: 0.92,
             useNativeDriver: true,
             speed: 30,
         }).start();
@@ -79,15 +82,6 @@ const CategoryItem = ({ category, isSelected, onPress, index }) => {
 };
 
 export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategory }) => {
-    // Group categories into pairs for 2-row layout
-    const chunkedCategories = React.useMemo(() => {
-        const chunks = [];
-        for (let i = 0; i < categories.length; i += 2) {
-            chunks.push(categories.slice(i, i + 2));
-        }
-        return chunks;
-    }, [categories]);
-
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -98,99 +92,87 @@ export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategor
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
                 decelerationRate="fast"
-                snapToInterval={160} // Card width + margin
             >
-                {chunkedCategories.map((chunk, chunkIndex) => (
-                    <View key={chunkIndex} style={styles.column}>
-                        {chunk.map((category, itemIndex) => {
-                            const isSelected = selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'All');
-                            const globalIndex = chunkIndex * 2 + itemIndex;
-                            return (
-                                <CategoryItem
-                                    key={category.id}
-                                    category={category}
-                                    isSelected={isSelected}
-                                    onPress={() => onSelectCategory(category.id)}
-                                    index={globalIndex}
-                                />
-                            );
-                        })}
-                    </View>
-                ))}
+                {categories.map((category, index) => {
+                    const isSelected = selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'All');
+                    return (
+                        <CategoryItem
+                            key={category.id}
+                            category={category}
+                            isSelected={isSelected}
+                            onPress={() => onSelectCategory(category.id)}
+                            index={index}
+                        />
+                    );
+                })}
             </ScrollView>
         </View>
     );
 };
 
+
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 8, // Reduced since parent has gap
+        marginBottom: 8,
     },
     header: {
         paddingHorizontal: theme.spacing.m,
-        marginBottom: 16,
+        marginBottom: 12,
     },
     title: {
-        fontSize: 22,
-        fontWeight: '800',
-        color: '#111827',
-        letterSpacing: -0.5,
+        fontSize: 20,
+        fontWeight: '700',
+        color: theme.colors.text,
+        letterSpacing: -0.3,
     },
     scrollContent: {
-        paddingHorizontal: 12,
-    },
-    column: {
-        marginRight: 8,
+        paddingHorizontal: theme.spacing.m,
     },
     categoryCard: {
-        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: theme.colors.surface,
-        padding: 10,
-        borderRadius: 16,
-        marginBottom: 8,
-        width: 150,
-        height: 60,
-        borderWidth: 2,
-        borderColor: '#F3F4F6',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: theme.borderRadius.l,
+        minWidth: 90,
+        marginRight: 10,
+        borderWidth: 1.5,
+        borderColor: '#E5E7EB',
+        ...theme.shadows.small,
     },
     categoryCardActive: {
         backgroundColor: theme.colors.primary,
         borderColor: theme.colors.primary,
         shadowColor: theme.colors.primary,
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        elevation: 6,
-        transform: [{ scale: 1.02 }],
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 5,
     },
     iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 48,
+        height: 48,
+        borderRadius: theme.borderRadius.full,
         backgroundColor: '#F9FAFB',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 10,
+        marginBottom: 8,
     },
     iconContainerActive: {
         backgroundColor: 'rgba(255, 255, 255, 0.25)',
     },
     emoji: {
-        fontSize: 22,
+        fontSize: 24,
     },
     categoryName: {
-        flex: 1,
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 13,
+        fontWeight: '600',
         color: theme.colors.text,
+        textAlign: 'center',
     },
     categoryNameActive: {
         color: '#FFFFFF',
-        fontWeight: '800',
+        fontWeight: '700',
     },
 });
+
