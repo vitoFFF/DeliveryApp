@@ -27,19 +27,20 @@ export const HorizontalList = ({ title, data, renderItem }) => {
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: theme.spacing.l,
+        marginBottom: 8, // Reduced margin since we use gap in parent
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: theme.spacing.m,
-        marginBottom: theme.spacing.m,
+        marginBottom: 16, // More space between title and content
     },
     title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: theme.colors.text,
+        fontSize: 22, // Larger for better hierarchy
+        fontWeight: '800', // Bolder
+        color: '#111827',
+        letterSpacing: -0.5, // Tighter tracking for headlines
     },
     seeAll: {
         fontSize: 14,

@@ -3,7 +3,7 @@ import { View, StyleSheet, FlatList, Text } from 'react-native';
 import { RestaurantCard } from './RestaurantCard';
 import { theme } from '../utils/theme';
 
-export const RestaurantList = ({ restaurants, onRestaurantPress }) => {
+export const RestaurantList = ({ restaurants, onRestaurantPress, markFirstAsFeatured = false }) => {
     if (restaurants.length === 0) {
         return (
             <View style={styles.container}>
@@ -20,11 +20,12 @@ export const RestaurantList = ({ restaurants, onRestaurantPress }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Popular Near You</Text>
-            {restaurants.map((restaurant) => (
+            {restaurants.map((restaurant, index) => (
                 <RestaurantCard
                     key={restaurant.id}
                     restaurant={restaurant}
                     onPress={() => onRestaurantPress(restaurant)}
+                    isFeatured={markFirstAsFeatured && index === 0}
                 />
             ))}
         </View>
@@ -37,10 +38,11 @@ const styles = StyleSheet.create({
         paddingBottom: theme.spacing.xl,
     },
     title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: theme.colors.text,
-        marginBottom: theme.spacing.m,
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#111827',
+        letterSpacing: -0.5,
+        marginBottom: 16,
     },
     emptyState: {
         alignItems: 'center',

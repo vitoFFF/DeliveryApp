@@ -1,11 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, ShoppingBag, User } from 'lucide-react-native';
+import { Home, User } from 'lucide-react-native';
 import { Text } from 'react-native';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { FavouriteScreen } from '../screens/FavouriteScreen';
-import { AIChatScreen } from '../screens/AIChatScreen';
+import { OrderStatusScreen } from '../screens/OrderStatusScreen';
 import { HomeNavigator } from './HomeNavigator';
 import { CustomTabBar } from '../components/CustomTabBar';
 import { theme } from '../utils/theme';
@@ -21,13 +21,13 @@ export const MainNavigator = () => {
                 tabBarIcon: ({ color, size, focused }) => {
                     if (route.name === 'HomeTab') {
                         return <Home size={size} color={color} />;
-                    } else if (route.name === 'Favourite') {
-                        return <Text style={{ fontSize: size }}>🧡</Text>;
-                    } else if (route.name === 'AIChat') {
-                        return <Text style={{ fontSize: size }}>🔴</Text>;
+                    } else if (route.name === 'Favourites') {
+                        return <Text style={{ fontSize: size }}>❤️</Text>;
                     } else if (route.name === 'Cart') {
                         return <Text style={{ fontSize: size }}>🛒</Text>;
-                    } else if (route.name === 'Profile') {
+                    } else if (route.name === 'Orders') {
+                        return <Text style={{ fontSize: size }}>🧾</Text>;
+                    } else if (route.name === 'Account') {
                         return <User size={size} color={color} />;
                     }
                 },
@@ -41,17 +41,10 @@ export const MainNavigator = () => {
                 }}
             />
             <Tab.Screen
-                name="Favourite"
+                name="Favourites"
                 component={FavouriteScreen}
                 options={{
-                    tabBarLabel: 'Favourite',
-                }}
-            />
-            <Tab.Screen
-                name="AIChat"
-                component={AIChatScreen}
-                options={{
-                    tabBarLabel: 'AI Chat',
+                    tabBarLabel: 'Favorites',
                 }}
             />
             <Tab.Screen
@@ -59,13 +52,21 @@ export const MainNavigator = () => {
                 component={CartScreen}
                 options={{
                     tabBarLabel: 'Cart',
+                    isBigButton: true, // Custom prop for big middle button
                 }}
             />
             <Tab.Screen
-                name="Profile"
+                name="Orders"
+                component={OrderStatusScreen}
+                options={{
+                    tabBarLabel: 'Orders',
+                }}
+            />
+            <Tab.Screen
+                name="Account"
                 component={ProfileScreen}
                 options={{
-                    tabBarLabel: 'Profile',
+                    tabBarLabel: 'Account',
                 }}
             />
         </Tab.Navigator>

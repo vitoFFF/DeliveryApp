@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../components/Header';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryCarousel } from '../components/CategoryCarousel';
 import { RestaurantList } from '../components/RestaurantList';
 import { HorizontalList } from '../components/HorizontalList';
+import { SkeletonCard, SkeletonHorizontalCard, SkeletonCategory } from '../components/SkeletonLoader';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { theme } from '../utils/theme';
 
@@ -109,9 +110,38 @@ export const HomeScreen = ({ navigation }) => {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
-                <View style={[styles.container, styles.centerContent]}>
-                    <ActivityIndicator size="large" color={theme.colors.primary} />
-                    <Text style={styles.loadingText}>Loading data...</Text>
+                <View style={styles.container}>
+                    <Header />
+                    <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.scrollContent}
+                    >
+                        {/* Skeleton Categories */}
+                        <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                {[1, 2, 3, 4].map((i) => (
+                                    <SkeletonCategory key={i} />
+                                ))}
+                            </ScrollView>
+                        </View>
+
+                        {/* Skeleton Horizontal Cards */}
+                        <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                {[1, 2, 3].map((i) => (
+                                    <SkeletonHorizontalCard key={i} />
+                                ))}
+                            </ScrollView>
+                        </View>
+
+                        {/* Skeleton Restaurant Cards */}
+                        <View style={{ paddingHorizontal: 16 }}>
+                            {[1, 2, 3].map((i) => (
+                                <SkeletonCard key={i} />
+                            ))}
+                        </View>
+                    </ScrollView>
                 </View>
             </SafeAreaView>
         );
@@ -167,6 +197,7 @@ export const HomeScreen = ({ navigation }) => {
                     <RestaurantList
                         restaurants={filteredVenues}
                         onRestaurantPress={handleRestaurantPress}
+                        markFirstAsFeatured={!searchQuery && selectedCategory === 'All'}
                     />
                 </ScrollView>
             </View>
@@ -183,7 +214,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingBottom: theme.spacing.xl,
+        paddingBottom: theme.spacing.xl * 2, // More breathing room at bottom
+        gap: 24, // Consistent vertical spacing between sections (Gestalt: Proximity)
     },
     horizontalCard: {
         width: 280,
