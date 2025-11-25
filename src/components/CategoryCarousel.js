@@ -46,34 +46,34 @@ const CategoryItem = ({ category, isSelected, onPress, index }) => {
 
     return (
         <Animated.View
-            style={{
-                opacity: fadeAnim,
-                transform: [
-                    { translateY: slideAnim },
-                    { scale: scaleAnim }
-                ],
-            }}
+            style={[
+                styles.categoryItemWrapper,
+                {
+                    opacity: fadeAnim,
+                    transform: [
+                        { translateY: slideAnim },
+                        { scale: scaleAnim }
+                    ],
+                }
+            ]}
         >
             <TouchableOpacity
-                style={[
-                    styles.categoryCard,
-                    isSelected && styles.categoryCardActive,
-                ]}
+                style={styles.categoryCard}
                 onPress={onPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
-                activeOpacity={1}
+                activeOpacity={0.7}
             >
                 <View style={[
-                    styles.iconContainer,
-                    isSelected && styles.iconContainerActive
+                    styles.circleContainer,
+                    isSelected && styles.circleContainerActive
                 ]}>
                     <Text style={styles.emoji}>{category.emoji}</Text>
                 </View>
                 <Text style={[
                     styles.categoryName,
                     isSelected && styles.categoryNameActive
-                ]}>
+                ]} numberOfLines={2}>
                     {category.name}
                 </Text>
             </TouchableOpacity>
@@ -81,12 +81,18 @@ const CategoryItem = ({ category, isSelected, onPress, index }) => {
     );
 };
 
-export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategory }) => {
+export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategory, onSeeMore }) => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Browse by Category</Text>
+                <Text style={styles.title}>Categories</Text>
+                {onSeeMore && (
+                    <TouchableOpacity onPress={onSeeMore} style={styles.seeMoreButton}>
+                        <Text style={styles.seeMoreText}>See More</Text>
+                    </TouchableOpacity>
+                )}
             </View>
+
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -106,6 +112,13 @@ export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategor
                     );
                 })}
             </ScrollView>
+
+            {/* Creative Dashed Line Separator */}
+            <View style={styles.separatorContainer}>
+                <View style={styles.dashedLine} />
+                <View style={styles.centerDot} />
+                <View style={styles.dashedLine} />
+            </View>
         </View>
     );
 };
@@ -116,8 +129,11 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         paddingHorizontal: theme.spacing.m,
-        marginBottom: 12,
+        marginBottom: 16,
     },
     title: {
         fontSize: 20,
@@ -125,54 +141,85 @@ const styles = StyleSheet.create({
         color: theme.colors.text,
         letterSpacing: -0.3,
     },
+    seeMoreButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    seeMoreText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: theme.colors.primary,
+    },
     scrollContent: {
         paddingHorizontal: theme.spacing.m,
+        paddingBottom: 8,
+    },
+    categoryItemWrapper: {
+        marginRight: 16,
+        alignItems: 'center',
     },
     categoryCard: {
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    circleContainer: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
         backgroundColor: theme.colors.surface,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: theme.borderRadius.l,
-        minWidth: 90,
-        marginRight: 10,
-        borderWidth: 1.5,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
         borderColor: '#E5E7EB',
+        marginBottom: 8,
         ...theme.shadows.small,
     },
-    categoryCardActive: {
+    circleContainerActive: {
         backgroundColor: theme.colors.primary,
         borderColor: theme.colors.primary,
         shadowColor: theme.colors.primary,
-        shadowOpacity: 0.25,
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    iconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: theme.borderRadius.full,
-        backgroundColor: '#F9FAFB',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    iconContainerActive: {
-        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+        elevation: 6,
     },
     emoji: {
-        fontSize: 24,
+        fontSize: 32,
     },
     categoryName: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '600',
         color: theme.colors.text,
         textAlign: 'center',
+        maxWidth: 70,
     },
     categoryNameActive: {
-        color: '#FFFFFF',
+        color: theme.colors.primary,
         fontWeight: '700',
     },
+    // Dashed Line Separator Styles
+    separatorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 20,
+        marginBottom: 12,
+        paddingHorizontal: theme.spacing.m,
+    },
+    dashedLine: {
+        flex: 1,
+        height: 1,
+        borderStyle: 'dashed',
+        borderWidth: 1,
+        borderColor: '#D1D5DB',
+        borderRadius: 1,
+    },
+    centerDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: theme.colors.primary,
+        marginHorizontal: 12,
+    },
 });
+
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, User } from 'lucide-react-native';
-import { Text } from 'react-native';
+import { Text, Image } from 'react-native';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { CartScreen } from '../screens/CartScreen';
+import { AIHubScreen } from '../screens/AIHubScreen';
 import { FavouriteScreen } from '../screens/FavouriteScreen';
 import { OrderStatusScreen } from '../screens/OrderStatusScreen';
 import { HomeNavigator } from './HomeNavigator';
@@ -23,8 +23,8 @@ export const MainNavigator = () => {
                         return <Home size={size} color={color} />;
                     } else if (route.name === 'Favourites') {
                         return <Text style={{ fontSize: size }}>💔</Text>;
-                    } else if (route.name === 'Cart') {
-                        return <Text style={{ fontSize: size }}>🌀</Text>;
+                    } else if (route.name === 'AIHub') {
+                        return <Image source={require('../../assets/ai.png')} style={{ width: size, height: size }} />;
                     } else if (route.name === 'Orders') {
                         return <Text style={{ fontSize: size }}>🧾</Text>;
                     } else if (route.name === 'Account') {
@@ -48,10 +48,10 @@ export const MainNavigator = () => {
                 }}
             />
             <Tab.Screen
-                name="Cart"
-                component={CartScreen}
+                name="AIHub"
+                component={AIHubScreen}
                 options={{
-                    tabBarLabel: 'Cart',
+                    tabBarLabel: 'AI Hub',
                     isBigButton: true, // Custom prop for big middle button
                 }}
             />

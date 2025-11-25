@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Header } from '../components/Header';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryCarousel } from '../components/CategoryCarousel';
-import { RestaurantList } from '../components/RestaurantList';
+import { CategoryResultsView } from '../components/CategoryResultsView';
 import { HorizontalList } from '../components/HorizontalList';
 import { SkeletonCard, SkeletonHorizontalCard, SkeletonCategory } from '../components/SkeletonLoader';
 import { FilterChips } from '../components/FilterChips';
@@ -25,9 +26,16 @@ const getRandomItems = (arr, count) => {
 export const HomeScreen = ({ navigation }) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedFilter, setSelectedFilter] = useState(null);
     const { categories, venues, products, loading, error } = useFirebaseData();
+
+    // Reset category when home tab is pressed
+    useFocusEffect(
+        React.useCallback(() => {
+            setSelectedCategory(null);
+        }, [])
+    );
 
     const filters = [t('filters.rating'), t('filters.time'), t('filters.price'), t('filters.dietary')];
 
@@ -35,13 +43,16 @@ export const HomeScreen = ({ navigation }) => {
         navigation.navigate('RestaurantDetail', { restaurant });
     };
 
-    // Prepare categories with "All" option
-    const allCategories = useMemo(() => {
-        return [{ id: 'all', name: t('common.all'), icon: 'apps', emoji: '🌟' }, ...categories];
-    }, [categories, t]);
+    const handleSeeAllCategories = () => {
+        navigation.navigate('AllCategories', { categories });
+    };
 
     const handleCategorySelect = (categoryId) => {
         setSelectedCategory(categoryId);
+    };
+
+    const handleClearCategory = () => {
+        setSelectedCategory(null);
     };
 
     const filteredVenues = useMemo(() => {
@@ -56,7 +67,7 @@ export const HomeScreen = ({ navigation }) => {
             );
         }
 
-        if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'all') {
+        if (selectedCategory) {
             filtered = filtered.filter((venue) => venue.categoryId === selectedCategory);
         }
 
@@ -185,12 +196,13 @@ export const HomeScreen = ({ navigation }) => {
                     contentContainerStyle={styles.scrollContent}
                 >
                     <CategoryCarousel
-                        categories={allCategories}
+                        categories={categories.slice(0, 6)}
                         selectedCategory={selectedCategory}
                         onSelectCategory={handleCategorySelect}
+                        onSeeMore={handleSeeAllCategories}
                     />
 
-                    {(selectedCategory === 'All' || selectedCategory === 'all') && !searchQuery ? (
+                    {!selectedCategory && !searchQuery ? (
                         <>
                             {/* 1. Special Offers (Hero Section) */}
                             <SpecialOffersHero onOfferPress={(offer) => console.log('Offer pressed:', offer)} />
@@ -223,11 +235,12 @@ export const HomeScreen = ({ navigation }) => {
                             />
                         </>
                     ) : (
-                        // Show standard list when searching or filtering by category
-                        <RestaurantList
+                        // Show CategoryResultsView when filtering by category
+                        <CategoryResultsView
+                            category={categories.find(cat => cat.id === selectedCategory)}
                             restaurants={filteredVenues}
+                            onClearFilter={handleClearCategory}
                             onRestaurantPress={handleRestaurantPress}
-                            markFirstAsFeatured={!searchQuery && selectedCategory === 'All'}
                         />
                     )}
                 </ScrollView>
