@@ -22,13 +22,16 @@ export const MainNavigator = () => {
                     if (route.name === 'HomeTab') {
                         return <Home size={size} color={color} />;
                     } else if (route.name === 'Favourites') {
-                        return <Text style={{ fontSize: size }}>💔</Text>;
+                        return <Image source={require('../../assets/favorite.png')} style={{ width: 30, height: 30 | "" }} />;
+
+                        // return <Text style={{ fontSize: size }}>💔</Text>;
                     } else if (route.name === 'AIHub') {
-                        return <Image source={require('../../assets/ai.png')} style={{ width: size, height: size }} />;
+                        return <Image source={require('../../assets/infinity.png')} style={{ width: size, height: size }} />;
                     } else if (route.name === 'Orders') {
-                        return <Text style={{ fontSize: size }}>🧾</Text>;
+                        return <Text style={{ fontSize: 26 }}>🛒</Text>;
                     } else if (route.name === 'Account') {
-                        return <User size={size} color={color} />;
+                        // return <User size={size} color={color} />;
+                        return <Image source={require('../../assets/user.png')} style={{ width: 30, height: 30 }} />;
                     }
                 },
             })}
@@ -53,6 +56,7 @@ export const MainNavigator = () => {
                 options={{
                     tabBarLabel: 'AI Hub',
                     isBigButton: true, // Custom prop for big middle button
+                    tabBarButtonColor: '#502d05ff', // Custom background color
                 }}
             />
             <Tab.Screen

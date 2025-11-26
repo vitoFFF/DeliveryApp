@@ -114,11 +114,9 @@ export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategor
             </ScrollView>
 
             {/* Creative Dashed Line Separator */}
-            <View style={styles.separatorContainer}>
+            {/* <View style={styles.separatorContainer}>
                 <View style={styles.dashedLine} />
-                <View style={styles.centerDot} />
-                <View style={styles.dashedLine} />
-            </View>
+            </View> */}
         </View>
     );
 };
@@ -126,7 +124,7 @@ export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategor
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 8,
+        marginBottom: 3,
     },
     header: {
         flexDirection: 'row',
@@ -201,16 +199,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 20,
-        marginBottom: 12,
-        paddingHorizontal: theme.spacing.m,
+        marginTop: 2,
+        marginBottom: 1,
     },
     dashedLine: {
-        flex: 1,
-        height: 1,
-        borderStyle: 'dashed',
+        width: 30,
+        height: 0,
+        borderStyle: 'dotted',
         borderWidth: 1,
-        borderColor: '#D1D5DB',
+        borderColor: '#f88d00ff',
         borderRadius: 1,
     },
     centerDot: {

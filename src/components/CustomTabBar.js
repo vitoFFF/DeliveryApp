@@ -131,6 +131,10 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
                 <View style={[
                     styles.iconContainer,
                     isBigButton && styles.bigIconContainer,
+                    isBigButton && options.tabBarButtonColor && {
+                        backgroundColor: options.tabBarButtonColor,
+                        shadowColor: options.tabBarButtonColor
+                    },
                     isFocused && (isBigButton ? styles.activeBigIconContainer : styles.activeIconContainer)
                 ]}>
                     {options.tabBarIcon &&

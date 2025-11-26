@@ -13,7 +13,7 @@ const OFFERS = [
         id: '1',
         title: '50% OFF Sushi Platter',
         subtitle: 'Limited time offer',
-        image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&q=80',
+        image: 'https://plus.unsplash.com/premium_photo-1668146932065-d08643791942?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         color: '#FF6B6B',
     },
     {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
         padding: 24,
         paddingTop: 48,
         // Gradient-like overlay for text readability
-        backgroundColor: 'rgba(0,0,0,0.4)',
+        backgroundColor: 'rgba(0,0,0,0.2)',
     },
     badge: {
         alignSelf: 'flex-start',
