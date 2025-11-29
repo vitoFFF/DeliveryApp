@@ -38,7 +38,7 @@ export const ProfileScreen = () => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
-            <ScrollView style={styles.container}>
+            <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
                 <View style={styles.header}>
                     <Avatar.Text size={80} label={name.charAt(0) || 'U'} style={styles.avatar} />
                     {!isEditing ? (

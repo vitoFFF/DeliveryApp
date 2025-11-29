@@ -1,10 +1,13 @@
 {
   "expo": {
-    "name": "DeliveryApp",
+    "cli": {
+      "appVersionSource": "remote"
+    },
+    "name": "Electron",
     "slug": "DeliveryApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/fastcart.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/fastcart.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -30,6 +33,7 @@
       "eas": {
         "projectId": "dd3b236c-8235-4eed-ac7e-4900894ae633"
       }
-    }
+    },
+    "owner": "vito_314"
   }
 }
