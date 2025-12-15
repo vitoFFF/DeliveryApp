@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../config/firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
@@ -10,8 +11,9 @@ export const loginUser = createAsyncThunk(
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             await SecureStore.setItemAsync('userToken', user.accessToken);
-            // Return a serializable user object
-            return { uid: user.uid, email: user.email, displayName: user.displayName };
+            const userObj = { uid: user.uid, email: user.email, displayName: user.displayName };
+            await AsyncStorage.setItem('user', JSON.stringify(userObj));
+            return userObj;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -42,14 +44,15 @@ export const registerUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
     await SecureStore.deleteItemAsync('userToken');
+    await AsyncStorage.removeItem('user');
 });
 
 export const checkAuth = createAsyncThunk('auth/check', async () => {
     const token = await SecureStore.getItemAsync('userToken');
-    if (token) {
-        // In a real app, validate token or fetch user profile
-        // For now, we assume the token is valid if it exists
-        return { isAuthenticated: true };
+    const userStr = await AsyncStorage.getItem('user');
+    if (token && userStr) {
+        const user = JSON.parse(userStr);
+        return { isAuthenticated: true, user };
     }
     return { isAuthenticated: false };
 });
@@ -58,7 +61,9 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: {
         user: null,
+        user: null,
         isAuthenticated: false,
+        isAdmin: false,
         isLoading: false,
         error: null,
     },
@@ -74,6 +79,9 @@ const authSlice = createSlice({
                 state.isLoading = false;
                 state.isAuthenticated = true;
                 state.user = action.payload;
+                // Simple check for admin email - in production use Custom Claims or Database
+                const email = action.payload.email.toLowerCase();
+                state.isAdmin = email === 'admin@deliveryapp.com' || email === 'boss@gmail.com';
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;
@@ -97,11 +105,16 @@ const authSlice = createSlice({
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;
                 state.isAuthenticated = false;
+                state.isAdmin = false;
             })
             // Check Auth
             .addCase(checkAuth.fulfilled, (state, action) => {
                 state.isAuthenticated = action.payload.isAuthenticated;
-                // User profile would be fetched separately or on login
+                if (action.payload.isAuthenticated && action.payload.user) {
+                    state.user = action.payload.user;
+                    const email = action.payload.user.email.toLowerCase();
+                    state.isAdmin = email === 'admin@deliveryapp.com' || email === 'boss@gmail.com';
+                }
             });
     },
 });

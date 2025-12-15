@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSelector, useDispatch } from 'react-redux';
 import { Text, View } from 'react-native';
 import { LoginScreen } from '../screens/LoginScreen';
+import { AdminNavigator } from './AdminNavigator';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { MainNavigator } from './MainNavigator';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
@@ -13,7 +14,7 @@ import { checkAuth } from '../store/authSlice';
 const Stack = createNativeStackNavigator();
 
 export const AppNavigator = () => {
-    const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
+    const { isAuthenticated, isLoading, isAdmin } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -44,6 +45,12 @@ export const AppNavigator = () => {
                             options={{ headerShown: false }}
                         />
                     </>
+                ) : isAdmin ? (
+                    <Stack.Screen
+                        name="AdminPanel"
+                        component={AdminNavigator}
+                        options={{ headerShown: false }}
+                    />
                 ) : (
                     <>
                         <Stack.Screen
@@ -64,6 +71,6 @@ export const AppNavigator = () => {
                     </>
                 )}
             </Stack.Navigator>
-        </NavigationContainer>
+        </NavigationContainer >
     );
 };

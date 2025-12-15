@@ -7,7 +7,7 @@
     "slug": "DeliveryApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/fastcart.png",
+    "icon": "./assets/xxxhdpi.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/fastcart.png",
+        "foregroundImage": "./assets/xxxhdpi.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
