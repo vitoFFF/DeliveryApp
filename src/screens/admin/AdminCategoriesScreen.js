@@ -3,12 +3,10 @@ import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-nativ
 import { Text, FAB, Dialog, Portal, TextInput, Button, ActivityIndicator } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { database } from '../../config/firebaseConfig';
-import { ref, onValue, set, push, remove } from 'firebase/database';
 import { theme } from '../../utils/theme';
+import { supabase } from '../../config/supabaseConfig';
 
 export const AdminCategoriesScreen = ({ navigation }) => {
-    // ... existing logic ...
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [visible, setVisible] = useState(false);
@@ -16,16 +14,25 @@ export const AdminCategoriesScreen = ({ navigation }) => {
     const [name, setName] = useState('');
     const [emoji, setEmoji] = useState('');
 
-    useEffect(() => {
-        const categoriesRef = ref(database, 'deliveryApp/categories');
-        const unsubscribe = onValue(categoriesRef, (snapshot) => {
-            const data = snapshot.val();
-            const loadedCategories = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
-            setCategories(loadedCategories);
-            setLoading(false);
-        });
+    const fetchData = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('categories')
+                .select('*')
+                .order('name');
 
-        return () => unsubscribe();
+            if (error) throw error;
+            setCategories(data);
+        } catch (err) {
+            console.error(err);
+            Alert.alert('Error', 'Failed to load categories');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
     }, []);
 
     const showDialog = (category = null) => {
@@ -48,23 +55,30 @@ export const AdminCategoriesScreen = ({ navigation }) => {
             Alert.alert('Error', 'Name is required');
             return;
         }
+
+        const payload = {
+            name,
+            emoji
+        };
+
         try {
             if (editingId) {
-                await set(ref(database, `deliveryApp/categories/${editingId}`), {
-                    id: editingId,
-                    name,
-                    emoji
-                });
+                const { error } = await supabase
+                    .from('categories')
+                    .update(payload)
+                    .eq('id', editingId);
+                if (error) throw error;
             } else {
-                // Use name as ID (slugified) or use push()
+                // Use name as ID (slugified)
                 const newId = name.toLowerCase().replace(/\s+/g, '-');
-                await set(ref(database, `deliveryApp/categories/${newId}`), {
-                    id: newId,
-                    name,
-                    emoji
-                });
+                // Check if exists? Unique constraint on PK will fail if duplicate.
+                const { error } = await supabase
+                    .from('categories')
+                    .insert({ id: newId, ...payload });
+                if (error) throw error;
             }
             hideDialog();
+            fetchData();
         } catch (error) {
             Alert.alert('Error', error.message);
         }
@@ -81,7 +95,12 @@ export const AdminCategoriesScreen = ({ navigation }) => {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            await remove(ref(database, `deliveryApp/categories/${id}`));
+                            const { error } = await supabase
+                                .from('categories')
+                                .delete()
+                                .eq('id', id);
+                            if (error) throw error;
+                            fetchData();
                         } catch (error) {
                             Alert.alert('Error', error.message);
                         }

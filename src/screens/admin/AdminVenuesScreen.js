@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, TouchableOpacity, Alert, Image, ScrollView, Platform } from 'react-native';
-import { Text, FAB, Dialog, Portal, TextInput, Button, ActivityIndicator, List } from 'react-native-paper';
+import { Text, FAB, Dialog, Portal, TextInput, Button, ActivityIndicator } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { database } from '../../config/firebaseConfig';
-import { ref, onValue, set, push, remove } from 'firebase/database';
 import { theme } from '../../utils/theme';
+import { supabase } from '../../config/supabaseConfig';
 
 export const AdminVenuesScreen = ({ navigation, route }) => {
     const { categoryId: filterCategoryId } = route.params || {};
@@ -23,42 +22,61 @@ export const AdminVenuesScreen = ({ navigation, route }) => {
     const [priceRange, setPriceRange] = useState('$');
     const [imageUrl, setImageUrl] = useState('');
 
-    useEffect(() => {
-        const venuesRef = ref(database, 'deliveryApp/venues');
-        const categoriesRef = ref(database, 'deliveryApp/categories');
+    const fetchData = async () => {
+        try {
+            // Fetch Categories
+            const { data: cats, error: catError } = await supabase
+                .from('categories')
+                .select('*')
+                .order('name');
 
-        const unsubVenues = onValue(venuesRef, (snapshot) => {
-            const data = snapshot.val();
-            let loadedVenues = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
+            if (catError) throw catError;
+            setCategories(cats);
 
-            // Filter if category passed
+            // Fetch Venues
+            let query = supabase.from('venues').select('*').order('created_at', { ascending: false });
+            // Note: simple filtering here or client side? Client side is easier for multi-category check logic that existed before.
+            // But strict category_id check can be done here.
+
+            const { data: vens, error: venError } = await query;
+            if (venError) throw venError;
+
+            // Map keys
+            const mappedVenues = vens.map(v => ({
+                ...v,
+                categoryId: v.category_id,
+                deliveryTime: v.delivery_time,
+                priceRange: v.price_range
+            }));
+
+            // Client side filter to match original logic (array includes or exact match)
+            let filtered = mappedVenues;
             if (filterCategoryId) {
-                loadedVenues = loadedVenues.filter(v =>
+                filtered = mappedVenues.filter(v =>
                     v.categoryId === filterCategoryId ||
                     (v.categories && v.categories.includes(filterCategoryId))
                 );
             }
 
-            setVenues(loadedVenues);
+            setVenues(filtered);
+        } catch (err) {
+            console.error(err);
+            Alert.alert('Error', 'Failed to load data');
+        } finally {
             setLoading(false);
-        });
+        }
+    };
 
-        const unsubCategories = onValue(categoriesRef, (snapshot) => {
-            const data = snapshot.val();
-            const loadedCats = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
-            setCategories(loadedCats);
-        });
+    useEffect(() => {
+        fetchData();
+    }, [filterCategoryId]);
 
-        // Pre-fill form if adding new under this filter
-        if (filterCategoryId) {
+    // Pre-fill form if adding new under this filter
+    useEffect(() => {
+        if (filterCategoryId && !editingId) {
             setCategoryId(filterCategoryId);
         }
-
-        return () => {
-            unsubVenues();
-            unsubCategories();
-        };
-    }, [filterCategoryId]);
+    }, [filterCategoryId, editingId]);
 
     const showDialog = (venue = null) => {
         if (venue) {
@@ -72,7 +90,7 @@ export const AdminVenuesScreen = ({ navigation, route }) => {
         } else {
             setEditingId(null);
             setName('');
-            setCategoryId('');
+            setCategoryId(filterCategoryId || '');
             setRating('');
             setDeliveryTime('');
             setPriceRange('');
@@ -89,26 +107,39 @@ export const AdminVenuesScreen = ({ navigation, route }) => {
             return;
         }
 
-        const venueData = {
+        const payload = {
             name,
-            categoryId, // Primary category
-            categories: [categoryId], // For compatibility with array-based structure
+            category_id: categoryId,
+            categories: [categoryId],
             rating: parseFloat(rating) || 0,
-            deliveryTime,
-            priceRange,
+            delivery_time: deliveryTime,
+            price_range: priceRange,
             image: imageUrl,
-            id: editingId
         };
 
         try {
             if (editingId) {
-                await set(ref(database, `deliveryApp/venues/${editingId}`), venueData);
+                const { error } = await supabase
+                    .from('venues')
+                    .update(payload)
+                    .eq('id', editingId);
+                if (error) throw error;
             } else {
-                const newRef = push(ref(database, 'deliveryApp/venues'));
-                venueData.id = newRef.key;
-                await set(newRef, venueData);
+                // Generate ID or let DB handle it? Original used push key.
+                // Supabase tables are TEXT PK (from my schema), so simple string id is fine or uuid.
+                // schema says id is TEXT PRIMARY KEY. upsert in seeding passed id.
+                // To create new, we should usually let DB generate UUID if set to default gen_random_uuid(), but I set it as just TEXT.
+                // I should generate a random ID here to match the manual Text ID style of the schema if it doesn't auto-gen.
+                // My schema: `id TEXT PRIMARY KEY`. It does NOT have `DEFAULT gen_random_uuid()`. 
+                // So I MUST provide an ID.
+                const newId = `ven_${Date.now()}`;
+                const { error } = await supabase
+                    .from('venues')
+                    .insert({ ...payload, id: newId });
+                if (error) throw error;
             }
             hideDialog();
+            fetchData(); // Refresh
         } catch (error) {
             Alert.alert('Error', error.message);
         }
@@ -120,7 +151,15 @@ export const AdminVenuesScreen = ({ navigation, route }) => {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: async () => await remove(ref(database, `deliveryApp/venues/${id}`))
+                onPress: async () => {
+                    try {
+                        const { error } = await supabase.from('venues').delete().eq('id', id);
+                        if (error) throw error;
+                        fetchData();
+                    } catch (err) {
+                        Alert.alert('Error', err.message);
+                    }
+                }
             }
         ]);
     };
@@ -168,7 +207,7 @@ export const AdminVenuesScreen = ({ navigation, route }) => {
                     <Dialog.ScrollArea>
                         <ScrollView contentContainerStyle={styles.dialogScroll}>
                             <TextInput label="Name" value={name} onChangeText={setName} style={styles.input} />
-                            <TextInput label="Category ID (Manual for now)" value={categoryId} onChangeText={setCategoryId} style={styles.input} />
+                            <TextInput label="Category ID" value={categoryId} onChangeText={setCategoryId} style={styles.input} />
                             <TextInput label="Rating (0-5)" value={rating} onChangeText={setRating} keyboardType="numeric" style={styles.input} />
                             <TextInput label="Delivery Time (e.g. 20-30 min)" value={deliveryTime} onChangeText={setDeliveryTime} style={styles.input} />
                             <TextInput label="Price Range (e.g. $$)" value={priceRange} onChangeText={setPriceRange} style={styles.input} />

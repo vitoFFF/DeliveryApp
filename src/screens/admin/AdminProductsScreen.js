@@ -3,9 +3,8 @@ import { View, StyleSheet, FlatList, TouchableOpacity, Alert, Image, ScrollView 
 import { Text, FAB, Dialog, Portal, TextInput, Button, ActivityIndicator } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { database } from '../../config/firebaseConfig';
-import { ref, onValue, set, push, remove } from 'firebase/database';
 import { theme } from '../../utils/theme';
+import { supabase } from '../../config/supabaseConfig';
 
 export const AdminProductsScreen = ({ navigation, route }) => {
     // Get filter from navigation params
@@ -27,6 +26,33 @@ export const AdminProductsScreen = ({ navigation, route }) => {
     const [venueId, setVenueId] = useState('');
     const [imageUrl, setImageUrl] = useState('');
 
+    const fetchData = async () => {
+        try {
+            // Fetch Venues for Filter
+            const { data: vens, error: venError } = await supabase.from('venues').select('id, name');
+            if (venError) throw venError;
+            setVenues(vens);
+
+            // Fetch Products
+            let query = supabase.from('products').select('*').order('name');
+            const { data: prods, error: prodError } = await query;
+            if (prodError) throw prodError;
+
+            // Map
+            const mappedProducts = prods.map(p => ({
+                ...p,
+                restaurantId: p.restaurant_id
+            }));
+
+            setProducts(mappedProducts);
+        } catch (err) {
+            console.error(err);
+            Alert.alert('Error', 'Failed to load data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         // Update selected venue if param changes
         if (paramVenueId) {
@@ -35,26 +61,7 @@ export const AdminProductsScreen = ({ navigation, route }) => {
     }, [paramVenueId]);
 
     useEffect(() => {
-        const productsRef = ref(database, 'deliveryApp/products');
-        const venuesRef = ref(database, 'deliveryApp/venues');
-
-        const unsubProducts = onValue(productsRef, (snapshot) => {
-            const data = snapshot.val();
-            const loaded = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
-            setProducts(loaded);
-            setLoading(false);
-        });
-
-        const unsubVenues = onValue(venuesRef, (snapshot) => {
-            const data = snapshot.val();
-            const loaded = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
-            setVenues(loaded);
-        });
-
-        return () => {
-            unsubProducts();
-            unsubVenues();
-        };
+        fetchData();
     }, []);
 
     const showDialog = (product = null) => {
@@ -84,24 +91,30 @@ export const AdminProductsScreen = ({ navigation, route }) => {
             return;
         }
 
-        const productData = {
-            id: editingId,
+        const payload = {
             name,
             description,
             price: parseFloat(price) || 0,
-            restaurantId: venueId,
+            restaurant_id: venueId,
             image: imageUrl
         };
 
         try {
             if (editingId) {
-                await set(ref(database, `deliveryApp/products/${editingId}`), productData);
+                const { error } = await supabase
+                    .from('products')
+                    .update(payload)
+                    .eq('id', editingId);
+                if (error) throw error;
             } else {
-                const newRef = push(ref(database, 'deliveryApp/products'));
-                productData.id = newRef.key;
-                await set(newRef, productData);
+                const newId = `prod_${Date.now()}`;
+                const { error } = await supabase
+                    .from('products')
+                    .insert({ ...payload, id: newId });
+                if (error) throw error;
             }
             hideDialog();
+            fetchData();
         } catch (error) {
             Alert.alert('Error', error.message);
         }
@@ -113,7 +126,15 @@ export const AdminProductsScreen = ({ navigation, route }) => {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: async () => await remove(ref(database, `deliveryApp/products/${id}`))
+                onPress: async () => {
+                    try {
+                        const { error } = await supabase.from('products').delete().eq('id', id);
+                        if (error) throw error;
+                        fetchData();
+                    } catch (err) {
+                        Alert.alert('Error', err.message);
+                    }
+                }
             }
         ]);
     };

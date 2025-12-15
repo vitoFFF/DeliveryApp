@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { logoutUser } from '../store/authSlice';
 import { theme } from '../utils/theme';
-import { seedDatabase } from '../utils/seedDatabase';
+import { seedSupabase } from '../utils/seedSupabase';
 import LanguageSelector from '../components/LanguageSelector';
 
 export const ProfileScreen = () => {
@@ -21,17 +21,16 @@ export const ProfileScreen = () => {
     const handleSave = () => {
         // In a real app, dispatch an updateProfile action
         setIsEditing(false);
-        // Mock update local state or show success
     };
 
-    const handleSeedDatabase = async () => {
+    const handleSeed = async () => {
         setSeeding(true);
-        const success = await seedDatabase();
+        const success = await seedSupabase();
         setSeeding(false);
         if (success) {
-            Alert.alert('Success', 'Database seeded successfully!');
+            Alert.alert('Success', 'Data uploaded to Supabase!');
         } else {
-            Alert.alert('Error', 'Failed to seed database. Check console for details.');
+            Alert.alert('Error', 'Failed to upload data.');
         }
     };
 
@@ -64,7 +63,7 @@ export const ProfileScreen = () => {
                                 onChangeText={setEmail}
                                 style={styles.input}
                                 mode="outlined"
-                                disabled // Usually email is not editable easily
+                                disabled
                             />
                             <View style={styles.buttonRow}>
                                 <Button onPress={() => setIsEditing(false)} style={styles.button}>
@@ -100,11 +99,11 @@ export const ProfileScreen = () => {
                     />
                     <Divider />
                     <List.Item
-                        title={t('profile.seed_database')}
-                        description={t('profile.seed_database_description')}
-                        left={(props) => <List.Icon {...props} icon="database-refresh" color={theme.colors.error} />}
-                        onPress={handleSeedDatabase}
-                        right={() => seeding && <Button loading>Seeding...</Button>}
+                        title="Upload Mock Data to Supabase"
+                        description="One-time setup"
+                        left={(props) => <List.Icon {...props} icon="cloud-upload" color={theme.colors.primary} />}
+                        onPress={handleSeed}
+                        right={() => seeding && <Button loading>Uploading...</Button>}
                     />
                 </List.Section>
 
