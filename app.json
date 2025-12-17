@@ -34,6 +34,10 @@
         "projectId": "dd3b236c-8235-4eed-ac7e-4900894ae633"
       }
     },
-    "owner": "vito_314"
+    "owner": "vito_314",
+    "plugins": [
+      "expo-localization",
+      "expo-secure-store"
+    ]
   }
 }

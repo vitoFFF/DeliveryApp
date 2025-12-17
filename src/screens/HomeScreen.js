@@ -1,8 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity, LayoutChangeEvent, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    useAnimatedScrollHandler,
+    interpolate,
+    Extrapolate
+} from 'react-native-reanimated';
+import { BlurView } from 'expo-blur';
+
 import { Header } from '../components/Header';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryCarousel } from '../components/CategoryCarousel';
@@ -29,6 +38,16 @@ export const HomeScreen = ({ navigation }) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedFilter, setSelectedFilter] = useState(null);
     const { categories, venues, products, loading, error } = useFirebaseData();
+    const { width: screenWidth } = useWindowDimensions();
+
+    // Responsive dimensions
+    const cardWidth = Math.min(screenWidth * 0.75, 350); // 75% quite standard, max 350 for tablets
+    const drinkCardWidth = Math.min(screenWidth * 0.45, 200); // Smaller cards
+
+    // Animation Values
+    const scrollY = useSharedValue(0);
+    const [headerHeight, setHeaderHeight] = useState(60); // Default guess
+    const [stickyHeight, setStickyHeight] = useState(120); // Search + Filter guess
 
     // Reset category when home tab is pressed
     useFocusEffect(
@@ -76,11 +95,9 @@ export const HomeScreen = ({ navigation }) => {
 
 
     // Data for new sections
-    // TODO: Implement real logic for these sections
     const mealsUnderX = useMemo(() => {
         if (!products || products.length === 0) return [];
-        // Mock logic: just take some random products
-        return getRandomItems(products, 6).map(p => ({ ...p, price: 9.99 })); // Force price for demo
+        return getRandomItems(products, 6).map(p => ({ ...p, price: 9.99 }));
     }, [products]);
 
     const pickedForYou = useMemo(() => {
@@ -96,7 +113,7 @@ export const HomeScreen = ({ navigation }) => {
 
     const renderRestaurantCard = ({ item }) => (
         <TouchableOpacity
-            style={styles.horizontalCard}
+            style={[styles.horizontalCard, { width: cardWidth }]}
             onPress={() => handleRestaurantPress(item)}
         >
             <Image source={{ uri: item.image }} style={styles.horizontalImage} />
@@ -117,7 +134,7 @@ export const HomeScreen = ({ navigation }) => {
     const renderProductCard = ({ item }) => {
         if (!item) return null;
         return (
-            <TouchableOpacity style={styles.drinkCard}>
+            <TouchableOpacity style={[styles.drinkCard, { width: drinkCardWidth }]}>
                 <Image source={{ uri: item.image }} style={styles.drinkImage} />
                 <View style={styles.drinkInfo}>
                     <Text style={styles.drinkName} numberOfLines={1}>{item.name}</Text>
@@ -127,42 +144,48 @@ export const HomeScreen = ({ navigation }) => {
         );
     };
 
+    // Scroll Handler
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollY.value = event.contentOffset.y;
+        },
+    });
+
+    const headerAnimatedStyle = useAnimatedStyle(() => {
+        return {
+            transform: [
+                {
+                    translateY: interpolate(
+                        scrollY.value,
+                        [0, headerHeight],
+                        [0, -headerHeight],
+                        Extrapolate.CLAMP
+                    ),
+                },
+            ],
+        };
+    });
+
+    // Measurement handlers
+    const onHeaderLayout = (e) => {
+        setHeaderHeight(e.nativeEvent.layout.height);
+    };
+
+    const onStickyLayout = (e) => {
+        setStickyHeight(e.nativeEvent.layout.height);
+    };
+
     if (loading) {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
+                {/* Replicate structure even in loading for consistency, or just simplified loader */}
                 <View style={styles.container}>
                     <Header />
                     <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollContent}
-                    >
-                        {/* Skeleton Categories */}
-                        <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                {[1, 2, 3, 4].map((i) => (
-                                    <SkeletonCategory key={i} />
-                                ))}
-                            </ScrollView>
-                        </View>
-
-                        {/* Skeleton Horizontal Cards */}
-                        <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                {[1, 2, 3].map((i) => (
-                                    <SkeletonHorizontalCard key={i} />
-                                ))}
-                            </ScrollView>
-                        </View>
-
-                        {/* Skeleton Restaurant Cards */}
-                        <View style={{ paddingHorizontal: 16 }}>
-                            {[1, 2, 3].map((i) => (
-                                <SkeletonCard key={i} />
-                            ))}
-                        </View>
-                    </ScrollView>
+                    <View style={{ paddingHorizontal: 16 }}>
+                        {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
+                    </View>
                 </View>
             </SafeAreaView>
         );
@@ -171,7 +194,6 @@ export const HomeScreen = ({ navigation }) => {
     if (error) {
         return (
             <SafeAreaView style={styles.safeArea}>
-                <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
                 <View style={[styles.container, styles.centerContent]}>
                     <Text style={styles.errorText}>{t('common.failed_to_load')}</Text>
                 </View>
@@ -183,17 +205,40 @@ export const HomeScreen = ({ navigation }) => {
         <SafeAreaView style={styles.safeArea}>
             <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
             <View style={styles.container}>
-                <Header />
-                <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-                <FilterChips
-                    filters={filters}
-                    selectedFilter={selectedFilter}
-                    onSelect={setSelectedFilter}
-                />
 
-                <ScrollView
+                {/* Collapsible Header Container */}
+                <Animated.View
+                    style={[
+                        styles.fixedHeaderContainer,
+                        headerAnimatedStyle,
+                        { zIndex: 100 } // Ensure it stays on top
+                    ]}
+                >
+                    {/* Glassmorphism Background */}
+                    <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+
+                    <View onLayout={onHeaderLayout} style={styles.collapsiblePart}>
+                        <Header />
+                    </View>
+                    <View onLayout={onStickyLayout} style={styles.stickyPart}>
+                        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+                        <FilterChips
+                            filters={filters}
+                            selectedFilter={selectedFilter}
+                            onSelect={setSelectedFilter}
+                        />
+                    </View>
+                </Animated.View>
+
+                {/* Main Scroll Content */}
+                <Animated.ScrollView
+                    onScroll={scrollHandler}
+                    scrollEventThrottle={16}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        { paddingTop: headerHeight + stickyHeight + 16 } // Add padding for absolute header
+                    ]}
                 >
                     <CategoryCarousel
                         categories={categories.slice(0, 6)}
@@ -204,30 +249,24 @@ export const HomeScreen = ({ navigation }) => {
 
                     {!selectedCategory && !searchQuery ? (
                         <>
-                            {/* 1. Special Offers (Hero Section) */}
                             <SpecialOffersHero onOfferPress={(offer) => console.log('Offer pressed:', offer)} />
 
-                            {/* 2. Meals Under $10 */}
                             <HorizontalList
                                 title={t('home.meals_under')}
                                 data={mealsUnderX}
                                 renderItem={renderProductCard}
                             />
 
-                            {/* 3. Based on Weather */}
                             <WeatherSection onFoodPress={(food) => console.log('Weather food pressed:', food)} />
 
-                            {/* 4. Picked for You */}
                             <HorizontalList
                                 title={t('home.picked_for_you')}
                                 data={pickedForYou}
                                 renderItem={renderRestaurantCard}
                             />
 
-                            {/* 5. Collections */}
                             <CollectionsGrid onCollectionPress={(collection) => console.log('Collection pressed:', collection)} />
 
-                            {/* 6. Popular Now (Vertical List) */}
                             <VerticalList
                                 title={t('home.popular_now')}
                                 data={popularNow}
@@ -235,7 +274,6 @@ export const HomeScreen = ({ navigation }) => {
                             />
                         </>
                     ) : (
-                        // Show CategoryResultsView when filtering by category
                         <CategoryResultsView
                             category={categories.find(cat => cat.id === selectedCategory)}
                             restaurants={filteredVenues}
@@ -243,7 +281,7 @@ export const HomeScreen = ({ navigation }) => {
                             onRestaurantPress={handleRestaurantPress}
                         />
                     )}
-                </ScrollView>
+                </Animated.ScrollView>
             </View>
         </SafeAreaView>
     );
@@ -257,9 +295,30 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    fixedHeaderContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'transparent', // Make transparent for BlurView
+    },
+    collapsiblePart: {
+        // Wrapper for header
+        zIndex: 1,
+    },
+    stickyPart: {
+        // Wrapper for search + filters
+        backgroundColor: 'transparent', // Transparent to let BlurView show
+        paddingBottom: 8,
+        shadowColor: "#000", // Optional: Add a subtle shadow when stuck
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 3,
+    },
     scrollContent: {
-        paddingBottom: theme.spacing.xl * 2, // More breathing room at bottom
-        gap: 24, // Consistent vertical spacing between sections (Gestalt: Proximity)
+        paddingBottom: theme.spacing.xl * 2,
+        gap: 24,
     },
     horizontalCard: {
         width: 280,
@@ -268,7 +327,7 @@ const styles = StyleSheet.create({
         borderRadius: theme.borderRadius.m,
         ...theme.shadows.small,
         overflow: 'hidden',
-        marginBottom: theme.spacing.s, // For shadow
+        marginBottom: theme.spacing.s,
     },
     horizontalImage: {
         width: '100%',
@@ -335,10 +394,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    loadingText: {
-        marginTop: theme.spacing.m,
+    errorText: {
         fontSize: 16,
-        color: theme.colors.textSecondary,
+        color: theme.colors.error,
     },
 });
 
