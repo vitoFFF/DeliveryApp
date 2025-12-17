@@ -40,3 +40,9 @@ yarn-error.*
 /ios
 /android
 expo-go.apk
+
+# Local and temporary files
+config_backup.ini
+yay-build/
+.firebase/
+*.log

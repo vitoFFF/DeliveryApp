@@ -1,10 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MapPin, ChevronDown } from 'lucide-react-native';
 import { theme } from '../utils/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Location from 'expo-location';
 
 export const Header = () => {
+    const [address, setAddress] = useState('Planet Earth, Milky Way 🚀');
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const getAddress = async () => {
+            try {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+
+                if (status !== 'granted') {
+                    if (isMounted) {
+                        setAddress('Planet Earth, Milky Way 🚀');
+                        setIsLoading(false);
+                    }
+                    return;
+                }
+
+                const location = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Balanced,
+                });
+
+                const reverseGeocode = await Location.reverseGeocodeAsync({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                });
+
+                if (reverseGeocode && reverseGeocode.length > 0 && isMounted) {
+                    const addr = reverseGeocode[0];
+                    // Short form: Prefer street name, fallback to city/district
+                    const shortAddress = addr.street || addr.name || addr.city || addr.district || 'Planet Earth 🚀';
+                    setAddress(shortAddress);
+                }
+            } catch (error) {
+                console.log('Error getting address:', error);
+                if (isMounted) setAddress('Planet Earth 🚀');
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+
+        getAddress();
+
+        return () => { isMounted = false; };
+    }, []);
+
     return (
         <View style={styles.wrapper}>
             <LinearGradient
@@ -18,8 +65,10 @@ export const Header = () => {
                         <Text style={styles.deliverToText}>Deliver to</Text>
                         <TouchableOpacity style={styles.locationSelector}>
                             <MapPin size={16} color={theme.colors.primary} style={styles.icon} />
-                            <Text style={styles.locationText}>Home, 123 Main St</Text>
-                            <ChevronDown size={16} color={theme.colors.text} />
+                            <Text style={styles.locationText} numberOfLines={1}>
+                                {isLoading ? 'Locating...' : address}
+                            </Text>
+                            <ChevronDown size={14} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
                     </View>
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Image, Animated } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Image, Animated, Dimensions } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../utils/theme';
-import { Clock, MapPin, ChevronRight, Star, RotateCcw, Package, Truck, CheckCircle } from 'lucide-react-native';
+import { Clock, MapPin, ChevronRight, Star, RotateCcw, Package, Truck, CheckCircle, Navigation, Bike } from 'lucide-react-native';
 
 // Mock Data
 const ACTIVE_ORDERS = [
@@ -57,6 +59,28 @@ const STATUS_STEPS = [
     { label: 'On the way', icon: Truck },
     { label: 'Delivered', icon: CheckCircle },
 ];
+
+const REAL_ROUTE = [
+    { latitude: 41.7107, longitude: 44.7554 }, // Start: Vake
+    { latitude: 41.7150, longitude: 44.7450 },
+    { latitude: 41.7250, longitude: 44.7300 },
+    { latitude: 41.7350, longitude: 44.7150 },
+    { latitude: 41.7450, longitude: 44.7000 },
+    { latitude: 41.7510, longitude: 44.6850 },
+    { latitude: 41.7580, longitude: 44.6720 },
+    { latitude: 41.7610, longitude: 44.6606 }, // End: Tsodoreti
+];
+
+const MOCK_LOCATION = {
+    restaurant: REAL_ROUTE[0],
+    customer: REAL_ROUTE[REAL_ROUTE.length - 1],
+    initialRegion: {
+        latitude: 41.7358,
+        longitude: 44.708,
+        latitudeDelta: 0.12,
+        longitudeDelta: 0.12,
+    }
+};
 
 export const OrderStatusScreen = ({ route, navigation }) => {
     const [activeTab, setActiveTab] = useState('Active');
@@ -198,11 +222,9 @@ const OrderDetailView = ({ orderId, navigation }) => {
     const [currentStep, setCurrentStep] = useState(order.statusStep);
 
     useEffect(() => {
-        // Simulate progress
-        const interval = setInterval(() => {
-            setCurrentStep(prev => (prev < 3 ? prev + 1 : prev));
-        }, 3000);
-        return () => clearInterval(interval);
+        (async () => {
+            await Location.requestForegroundPermissionsAsync();
+        })();
     }, []);
 
     return (
@@ -216,9 +238,38 @@ const OrderDetailView = ({ orderId, navigation }) => {
             </View>
 
             <ScrollView contentContainerStyle={styles.detailContent}>
-                <View style={styles.mapPlaceholder}>
-                    <MapPin size={48} color={theme.colors.primary} />
-                    <Text style={styles.mapText}>Map View Placeholder</Text>
+                <View style={styles.mapContainer}>
+                    <MapView
+                        style={styles.map}
+                        initialRegion={MOCK_LOCATION.initialRegion}
+                        showsUserLocation={true}
+                        followsUserLocation={false}
+                    // provider={PROVIDER_GOOGLE} // Uncomment for Google Maps
+                    >
+                        <Marker
+                            coordinate={MOCK_LOCATION.restaurant}
+                            title="Restaurant"
+                        >
+                            <View style={styles.smallMarker}>
+                                <Package size={14} color="#fff" />
+                            </View>
+                        </Marker>
+
+                        <Marker
+                            coordinate={REAL_ROUTE[Math.floor(REAL_ROUTE.length / 2)]}
+                            title="Courier"
+                        >
+                            <View style={[styles.smallMarker, { backgroundColor: '#FF9800' }]}>
+                                <Bike size={14} color="#fff" />
+                            </View>
+                        </Marker>
+
+                        <Polyline
+                            coordinates={REAL_ROUTE}
+                            strokeColor={theme.colors.primary}
+                            strokeWidth={3}
+                        />
+                    </MapView>
                 </View>
 
                 <View style={styles.statusCard}>
@@ -472,17 +523,27 @@ const styles = StyleSheet.create({
     detailContent: {
         padding: theme.spacing.m,
     },
-    mapPlaceholder: {
-        height: 200,
-        backgroundColor: '#E0E0E0',
+    mapContainer: {
+        height: 250,
         borderRadius: theme.borderRadius.l,
+        overflow: 'hidden',
+        marginBottom: theme.spacing.m,
+        ...theme.shadows.medium,
+    },
+    map: {
+        width: '100%',
+        height: '100%',
+    },
+    smallMarker: {
+        backgroundColor: theme.colors.primary,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 1.5,
+        borderColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: theme.spacing.m,
-    },
-    mapText: {
-        color: theme.colors.textSecondary,
-        marginTop: 8,
+        ...theme.shadows.small,
     },
     statusCard: {
         backgroundColor: theme.colors.surface,
