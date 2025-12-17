@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../config/supabaseConfig';
+import { products as mockProducts } from '../data/mockData';
 
 /**
  * Custom hook to fetch data from Supabase

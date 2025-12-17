@@ -2,22 +2,33 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Title, Text, Button, TextInput, RadioButton } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectCartTotal, clearCart } from '../store/cartSlice';
+import { selectCartTotal, clearCart, selectCartItems } from '../store/cartSlice';
 import { api } from '../api/client';
 import { theme } from '../utils/theme';
+import { PaymentSimulationOverlay } from '../components/PaymentSimulationOverlay';
 
 export const CheckoutScreen = ({ navigation }) => {
     const total = useSelector(selectCartTotal);
+    const cartItems = useSelector(selectCartItems);
     const dispatch = useDispatch();
     const [address, setAddress] = useState('123 Main St, City');
     const [paymentMethod, setPaymentMethod] = useState('card');
     const [loading, setLoading] = useState(false);
+    const [showSimulation, setShowSimulation] = useState(false);
 
     const handlePlaceOrder = async () => {
+        if (paymentMethod === 'card') {
+            setShowSimulation(true);
+        } else {
+            submitOrder();
+        }
+    };
+
+    const submitOrder = async () => {
         setLoading(true);
         try {
             const result = await api.placeOrder({
-                items: [], // Pass actual items if needed by backend
+                items: cartItems,
                 total,
                 address,
                 paymentMethod,
@@ -33,6 +44,7 @@ export const CheckoutScreen = ({ navigation }) => {
             Alert.alert('Error', 'Failed to place order');
         } finally {
             setLoading(false);
+            setShowSimulation(false);
         }
     };
 
@@ -78,6 +90,11 @@ export const CheckoutScreen = ({ navigation }) => {
                     Place Order
                 </Button>
             </View>
+
+            <PaymentSimulationOverlay
+                visible={showSimulation}
+                onComplete={submitOrder}
+            />
         </View>
     );
 };

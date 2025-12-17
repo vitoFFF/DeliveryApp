@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Title, Text, Button, List, Divider, IconButton } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -29,64 +30,74 @@ export const CartScreen = ({ navigation }) => {
 
     if (items.length === 0) {
         return (
-            <View style={styles.emptyContainer}>
-                <Title>{t('cart.empty')}</Title>
-                <Button mode="contained" onPress={() => navigation.navigate('HomeTab')} style={styles.button}>
-                    {t('cart.browse_restaurants')}
-                </Button>
-            </View>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.emptyContainer}>
+                    <Title>{t('cart.empty')}</Title>
+                    <Button mode="contained" onPress={() => navigation.navigate('HomeTab')} style={styles.button}>
+                        {t('cart.browse_restaurants')}
+                    </Button>
+                </View>
+            </SafeAreaView>
         );
     }
 
     return (
-        <View style={styles.container}>
-            <Title style={styles.title}>{t('cart.title')}</Title>
-            <FlatList
-                data={items}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.menuItem.id}
-                ItemSeparatorComponent={Divider}
-                contentContainerStyle={styles.list}
-            />
-            <View style={styles.footer}>
-                <View style={styles.totalRow}>
-                    <Title>{t('common.total')}:</Title>
-                    <Title>${total.toFixed(2)}</Title>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <Title style={styles.title}>{t('cart.title')}</Title>
+                <FlatList
+                    data={items}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.menuItem.id}
+                    ItemSeparatorComponent={Divider}
+                    contentContainerStyle={styles.list}
+                />
+                <View style={styles.footer}>
+                    <View style={styles.totalRow}>
+                        <Title>{t('common.total')}:</Title>
+                        <Title>${total.toFixed(2)}</Title>
+                    </View>
+                    <Button
+                        mode="contained"
+                        onPress={() => navigation.navigate('Checkout')}
+                        style={styles.checkoutButton}
+                    >
+                        {t('cart.proceed_to_checkout')}
+                    </Button>
+                    <Button onPress={() => dispatch(clearCart())} style={styles.clearButton} color="red">
+                        {t('cart.clear_cart')}
+                    </Button>
                 </View>
-                <Button
-                    mode="contained"
-                    onPress={() => navigation.navigate('Checkout')}
-                    style={styles.checkoutButton}
-                >
-                    {t('cart.proceed_to_checkout')}
-                </Button>
-                <Button onPress={() => dispatch(clearCart())} style={styles.clearButton} color="red">
-                    {t('cart.clear_cart')}
-                </Button>
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    safeArea: {
         flex: 1,
         backgroundColor: theme.colors.background,
+    },
+    container: {
+        flex: 1,
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        padding: theme.spacing.m,
     },
     title: {
         padding: theme.spacing.m,
         textAlign: 'center',
+        backgroundColor: theme.colors.surface,
     },
     list: {
         flexGrow: 1,
     },
     footer: {
         padding: theme.spacing.m,
+        paddingBottom: 110, // Added padding to prevent overlap with floating custom tab bar
         backgroundColor: theme.colors.surface,
         elevation: 8,
     },

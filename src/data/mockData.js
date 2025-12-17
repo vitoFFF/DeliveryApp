@@ -178,6 +178,24 @@ export const products = [
         image: 'https://images.unsplash.com/photo-1615557960916-5f4791effe9d?w=500',
     },
 
+    // Burger King
+    {
+        id: 'prod_whopper',
+        restaurantId: 'ven_burgerking',
+        name: 'Whopper',
+        description: 'Flame-grilled beef patty with juicy tomatoes, fresh lettuce, creamy mayo, ketchup, crunchy pickles, and sliced white onions.',
+        price: 6.49,
+        image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500',
+    },
+    {
+        id: 'prod_bk_fries',
+        restaurantId: 'ven_burgerking',
+        name: 'BK Fries',
+        description: 'Premium cut, golden brown and crunchy.',
+        price: 2.49,
+        image: 'https://images.unsplash.com/photo-1573080496987-a199f8cd75ec?w=500',
+    },
+
     // Carrefour
     {
         id: 'prod_milk',

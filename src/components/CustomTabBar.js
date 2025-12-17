@@ -2,7 +2,10 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useSelector } from 'react-redux';
+import { selectCartCount } from '../store/cartSlice';
 import { theme } from '../utils/theme';
+import { Text as RNText } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -108,6 +111,8 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
     const scale = useSharedValue(1);
     const translateY = useSharedValue(0);
     const isBigButton = options.isBigButton || false;
+    const cartCount = useSelector(selectCartCount);
+    const isCart = routeName === 'Cart';
 
     React.useEffect(() => {
         if (isFocused) {
@@ -143,6 +148,12 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
                             size: isBigButton ? 32 : 24,
                             focused: isFocused,
                         })}
+
+                    {isCart && cartCount > 0 && (
+                        <View style={styles.badge}>
+                            <RNText style={styles.badgeText}>{cartCount}</RNText>
+                        </View>
+                    )}
                 </View>
                 {isFocused && !isBigButton && <Animated.View style={styles.activeDot} />}
             </Animated.View>
@@ -226,5 +237,25 @@ const styles = StyleSheet.create({
         height: 4,
         borderRadius: 2,
         backgroundColor: theme.colors.primary,
+    },
+    badge: {
+        position: 'absolute',
+        top: -4,
+        right: -4,
+        backgroundColor: '#FF3B30', // Modern iOS-style red
+        minWidth: 18,
+        height: 18,
+        borderRadius: 9,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 4,
+        borderWidth: 1.5,
+        borderColor: '#FFFFFF',
+    },
+    badgeText: {
+        color: '#FFFFFF',
+        fontSize: 10,
+        fontWeight: 'bold',
+        textAlign: 'center',
     }
 });

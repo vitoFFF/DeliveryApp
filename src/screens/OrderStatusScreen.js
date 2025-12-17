@@ -8,49 +8,12 @@ import { Clock, MapPin, ChevronRight, Star, RotateCcw, Package, Truck, CheckCirc
 
 // Mock Data
 const ACTIVE_ORDERS = [
-    {
-        id: 'ORD-2458',
-        restaurant: 'Burger King',
-        image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&q=80',
-        status: 'Preparing',
-        statusStep: 1,
-        items: ['Whopper Meal', 'Onion Rings'],
-        total: '$18.50',
-        eta: '15-20 min'
-    },
-    {
-        id: 'ORD-2459',
-        restaurant: 'Sushi Express',
-        image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=500&q=80',
-        status: 'Out for Delivery',
-        statusStep: 2,
-        items: ['Spicy Tuna Roll', 'Miso Soup', 'Edamame'],
-        total: '$32.00',
-        eta: '5-10 min'
-    },
+    // Empty by default, should be populated by real app logic if needed
+    // or kept empty for testing "no active orders" state
 ];
 
 const PAST_ORDERS = [
-    {
-        id: 'ORD-2301',
-        restaurant: 'Pizza Palace',
-        image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&q=80',
-        status: 'Delivered',
-        date: 'Yesterday, 8:30 PM',
-        items: ['Pepperoni Pizza (L)', 'Coke Zero'],
-        total: '$24.99',
-        rating: 5
-    },
-    {
-        id: 'ORD-2289',
-        restaurant: 'Green Bowl',
-        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80',
-        status: 'Delivered',
-        date: 'Nov 26, 1:15 PM',
-        items: ['Quinoa Salad', 'Green Smoothie'],
-        total: '$16.50',
-        rating: 4
-    },
+    // Empty by default
 ];
 
 const STATUS_STEPS = [
@@ -217,8 +180,17 @@ const EmptyState = ({ message }) => (
 );
 
 const OrderDetailView = ({ orderId, navigation }) => {
-    // Find order in mock data (fallback to first active for demo)
-    const order = ACTIVE_ORDERS.find(o => o.id === orderId) || ACTIVE_ORDERS[0];
+    // For demo, if orderId is provided but not in ACTIVE_ORDERS, use a placeholder
+    const order = ACTIVE_ORDERS.find(o => o.id === orderId) || {
+        id: orderId,
+        restaurant: 'Burger King', // Default for demo
+        image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&q=80',
+        status: 'Preparing',
+        statusStep: 1,
+        items: ['New Order'],
+        total: '$0.00',
+        eta: '15-20 min'
+    };
     const [currentStep, setCurrentStep] = useState(order.statusStep);
 
     useEffect(() => {

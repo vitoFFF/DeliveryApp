@@ -5,7 +5,7 @@ import { Text, Image } from 'react-native';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { AIHubScreen } from '../screens/AIHubScreen';
 import { FavouriteScreen } from '../screens/FavouriteScreen';
-import { OrderStatusScreen } from '../screens/OrderStatusScreen';
+import { CartScreen } from '../screens/CartScreen';
 import { HomeNavigator } from './HomeNavigator';
 import { CustomTabBar } from '../components/CustomTabBar';
 import { theme } from '../utils/theme';
@@ -27,7 +27,7 @@ export const MainNavigator = () => {
                         // return <Text style={{ fontSize: size }}>💔</Text>;
                     } else if (route.name === 'AIHub') {
                         return <Image source={require('../../assets/infinity.png')} style={{ width: size, height: size }} />;
-                    } else if (route.name === 'Orders') {
+                    } else if (route.name === 'Cart') {
                         return <Text style={{ fontSize: 26 }}>🛒</Text>;
                     } else if (route.name === 'Account') {
                         // return <User size={size} color={color} />;
@@ -60,10 +60,10 @@ export const MainNavigator = () => {
                 }}
             />
             <Tab.Screen
-                name="Orders"
-                component={OrderStatusScreen}
+                name="Cart"
+                component={CartScreen}
                 options={{
-                    tabBarLabel: 'Orders',
+                    tabBarLabel: 'Cart',
                 }}
             />
             <Tab.Screen

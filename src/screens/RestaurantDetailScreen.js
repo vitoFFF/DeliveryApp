@@ -1,12 +1,19 @@
 import React from 'react';
 import { View, StyleSheet, FlatList, Image } from 'react-native';
 import { Title, Text, Button, ActivityIndicator, Divider } from 'react-native-paper';
+import { useSelector, useDispatch } from 'react-redux';
 import { useVenueProducts } from '../hooks/useFirebaseData';
+import { addToCart } from '../store/cartSlice';
 import { theme } from '../utils/theme';
 
-export const RestaurantDetailScreen = ({ route }) => {
+export const RestaurantDetailScreen = ({ route, navigation }) => {
     const { restaurant } = route.params;
     const { products: menu, loading, error } = useVenueProducts(restaurant.id);
+    const dispatch = useDispatch();
+
+    const handleAddToCart = (item) => {
+        dispatch(addToCart({ menuItem: item, restaurantId: restaurant.id }));
+    };
 
     const renderItem = ({ item }) => (
         <View style={styles.menuItem}>
@@ -16,7 +23,11 @@ export const RestaurantDetailScreen = ({ route }) => {
                 <Text numberOfLines={2} style={styles.menuDesc}>{item.description}</Text>
                 <Text style={styles.menuPrice}>${item.price.toFixed(2)}</Text>
             </View>
-            <Button mode="contained" compact onPress={() => console.log('Add to cart', item)}>
+            <Button
+                mode="contained"
+                compact
+                onPress={() => handleAddToCart(item)}
+            >
                 Add
             </Button>
         </View>

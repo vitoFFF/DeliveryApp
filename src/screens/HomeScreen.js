@@ -25,7 +25,10 @@ import { CollectionsGrid } from '../components/CollectionsGrid';
 import { VerticalList } from '../components/VerticalList';
 import { NearbyServices } from '../components/NearbyServices';
 import { useFirebaseData } from '../hooks/useFirebaseData';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../store/cartSlice';
 import { theme } from '../utils/theme';
+import { Button } from 'react-native-paper';
 
 // Helper to get random items from an array
 const getRandomItems = (arr, count) => {
@@ -40,6 +43,7 @@ export const HomeScreen = ({ navigation }) => {
     const [selectedFilter, setSelectedFilter] = useState(null);
     const { categories, venues, products, loading, error } = useFirebaseData();
     const { width: screenWidth } = useWindowDimensions();
+    const dispatch = useDispatch();
 
     // Responsive dimensions
     const cardWidth = Math.min(screenWidth * 0.75, 350); // 75% quite standard, max 350 for tablets
@@ -132,16 +136,28 @@ export const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
     );
 
+    const handleAddToCart = (product) => {
+        dispatch(addToCart({ menuItem: product, restaurantId: product.restaurantId }));
+    };
+
     const renderProductCard = ({ item }) => {
         if (!item) return null;
         return (
-            <TouchableOpacity style={[styles.drinkCard, { width: drinkCardWidth }]}>
+            <View style={[styles.drinkCard, { width: drinkCardWidth }]}>
                 <Image source={{ uri: item.image }} style={styles.drinkImage} />
                 <View style={styles.drinkInfo}>
                     <Text style={styles.drinkName} numberOfLines={1}>{item.name}</Text>
                     <Text style={styles.drinkPrice}>${item.price.toFixed(2)}</Text>
                 </View>
-            </TouchableOpacity>
+                <Button
+                    mode="contained"
+                    compact
+                    style={styles.addBtn}
+                    onPress={() => handleAddToCart(item)}
+                >
+                    Add
+                </Button>
+            </View>
         );
     };
 
@@ -400,6 +416,9 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 16,
         color: theme.colors.error,
+    },
+    addBtn: {
+        marginTop: 8,
     },
 });
 
