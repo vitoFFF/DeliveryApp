@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../config/supabaseConfig';
 
@@ -27,7 +27,7 @@ export const loginUser = createAsyncThunk(
 
             const user = data.user;
             // Persist token manually to maintain compatibility with existing logic
-            await SecureStore.setItemAsync('userToken', data.session.access_token);
+            await storage.setItemAsync('userToken', data.session.access_token);
 
             const userObj = { uid: user.id, email: user.email, displayName: user.user_metadata?.full_name || user.email };
             await AsyncStorage.setItem('user', JSON.stringify(userObj));
@@ -58,7 +58,7 @@ export const registerUser = createAsyncThunk(
 
             // If email confirmation is enabled, session might be null immediately
             if (data.session) {
-                await SecureStore.setItemAsync('userToken', data.session.access_token);
+                await storage.setItemAsync('userToken', data.session.access_token);
             }
 
             // Return a serializable user object
@@ -71,7 +71,7 @@ export const registerUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
     await supabase.auth.signOut();
-    await SecureStore.deleteItemAsync('userToken');
+    await storage.deleteItemAsync('userToken');
     await AsyncStorage.removeItem('user');
 });
 
@@ -81,7 +81,7 @@ export const checkAuth = createAsyncThunk('auth/check', async () => {
 
     if (session && session.user) {
         // Refresh our local storage to match valid session
-        await SecureStore.setItemAsync('userToken', session.access_token);
+        await storage.setItemAsync('userToken', session.access_token);
         const userObj = {
             uid: session.user.id,
             email: session.user.email,
@@ -92,7 +92,7 @@ export const checkAuth = createAsyncThunk('auth/check', async () => {
     }
 
     // Fallback to local storage check if network fails or session missing but token exists (rare with Supabase)
-    const token = await SecureStore.getItemAsync('userToken');
+    const token = await storage.getItemAsync('userToken');
     const userStr = await AsyncStorage.getItem('user');
 
     if (token && userStr) {
