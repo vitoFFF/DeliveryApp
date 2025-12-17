@@ -23,7 +23,7 @@ import { SpecialOffersHero } from '../components/SpecialOffersHero';
 import { WeatherSection } from '../components/WeatherSection';
 import { CollectionsGrid } from '../components/CollectionsGrid';
 import { VerticalList } from '../components/VerticalList';
-import { NearbyDrivers } from '../components/NearbyDrivers';
+import { NearbyServices } from '../components/NearbyServices';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { theme } from '../utils/theme';
 
@@ -252,7 +252,7 @@ export const HomeScreen = ({ navigation }) => {
                         <>
                             <SpecialOffersHero onOfferPress={(offer) => console.log('Offer pressed:', offer)} />
 
-                            <NearbyDrivers />
+                            <NearbyServices />
 
                             <HorizontalList
                                 title={t('home.meals_under')}

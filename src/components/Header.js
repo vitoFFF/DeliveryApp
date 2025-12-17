@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MapPin, ChevronDown } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
+import { MapPin, ChevronDown, Settings, X, CreditCard, History, User, Bell, Shield } from 'lucide-react-native';
 import { theme } from '../utils/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
@@ -8,6 +8,7 @@ import * as Location from 'expo-location';
 export const Header = () => {
     const [address, setAddress] = useState('Planet Earth, Milky Way 🚀');
     const [isLoading, setIsLoading] = useState(true);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -72,16 +73,64 @@ export const Header = () => {
                         </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity style={styles.profileButton}>
+                    <TouchableOpacity
+                        style={styles.profileButton}
+                        onPress={() => setIsMenuOpen(true)}
+                    >
                         <View style={styles.avatarContainer}>
-                            <Text style={styles.avatarText}>VK</Text>
+                            <Settings size={20} color="#fff" />
                         </View>
                     </TouchableOpacity>
                 </View>
+
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={isMenuOpen}
+                    onRequestClose={() => setIsMenuOpen(false)}
+                >
+                    <Pressable
+                        style={styles.modalOverlay}
+                        onPress={() => setIsMenuOpen(false)}
+                    >
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Settings</Text>
+                                <TouchableOpacity
+                                    onPress={() => setIsMenuOpen(false)}
+                                    style={styles.closeButton}
+                                >
+                                    <X size={20} color={theme.colors.textSecondary} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.menuList}>
+                                <MenuItem icon={User} label="Profile" />
+                                <MenuItem icon={CreditCard} label="Payment Methods" />
+                                <MenuItem icon={History} label="Order History" />
+                                <MenuItem icon={Bell} label="Notifications" />
+                                <MenuItem icon={Shield} label="Privacy & Security" />
+                            </View>
+
+                            <View style={styles.comingSoonBadge}>
+                                <Text style={styles.comingSoonText}>✨ Features Coming Soon ✨</Text>
+                            </View>
+                        </View>
+                    </Pressable>
+                </Modal>
             </LinearGradient>
         </View>
     );
 };
+
+const MenuItem = ({ icon: Icon, label }) => (
+    <TouchableOpacity style={styles.menuItem}>
+        <View style={styles.menuIconContainer}>
+            <Icon size={18} color={theme.colors.primary} />
+        </View>
+        <Text style={styles.menuLabel}>{label}</Text>
+    </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
     wrapper: {
@@ -151,5 +200,75 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '800',
         fontSize: 15,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-end',
+        paddingTop: 60,
+        paddingRight: 16,
+    },
+    modalContent: {
+        width: 240,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 10,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#1F2937',
+    },
+    closeButton: {
+        padding: 4,
+    },
+    menuList: {
+        marginBottom: 20,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+    },
+    menuIconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        backgroundColor: '#F3F4F6',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    menuLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#4B5563',
+    },
+    comingSoonBadge: {
+        backgroundColor: '#F3F4F6',
+        borderRadius: 12,
+        paddingVertical: 8,
+        alignItems: 'center',
+    },
+    comingSoonText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: theme.colors.primary,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     }
 });
