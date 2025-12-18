@@ -16,6 +16,7 @@ import { WeatherSection } from '../components/WeatherSection';
 import { CollectionsGrid } from '../components/CollectionsGrid';
 import { VerticalList } from '../components/VerticalList';
 import { NearbyServices } from '../components/NearbyServices';
+import { AdvancedFilterModal } from '../components/AdvancedFilterModal';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../store/cartSlice';
@@ -33,6 +34,7 @@ export const HomeScreen = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedFilter, setSelectedFilter] = useState(null);
+    const [showFilterModal, setShowFilterModal] = useState(false);
     const { categories, venues, products, loading, error } = useFirebaseData();
     const { width: screenWidth } = useWindowDimensions();
     const dispatch = useDispatch();
@@ -157,7 +159,11 @@ export const HomeScreen = ({ navigation }) => {
                 {/* Replicate structure even in loading for consistency, or just simplified loader */}
                 <View style={styles.container}>
                     <Header />
-                    <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+                    <SearchBar
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        onFilterPress={() => setShowFilterModal(true)}
+                    />
                     <View style={{ paddingHorizontal: 16 }}>
                         {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
                     </View>
@@ -190,7 +196,11 @@ export const HomeScreen = ({ navigation }) => {
                     contentContainerStyle={styles.scrollContent}
                 >
                     <View style={styles.stickyPart}>
-                        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+                        <SearchBar
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            onFilterPress={() => setShowFilterModal(true)}
+                        />
                         <FilterChips
                             filters={filters}
                             selectedFilter={selectedFilter}
@@ -203,10 +213,17 @@ export const HomeScreen = ({ navigation }) => {
                         selectedCategory={selectedCategory}
                         onSelectCategory={handleCategorySelect}
                         onSeeMore={handleSeeAllCategories}
+                        style={{ marginBottom: 28 }}
                     />
 
                     {!selectedCategory && !searchQuery ? (
                         <>
+                            <HorizontalList
+                                title={t('home.picked_for_you')}
+                                data={pickedForYou}
+                                renderItem={renderRestaurantCard}
+                            />
+
                             <SpecialOffersHero onOfferPress={(offer) => console.log('Offer pressed:', offer)} />
 
                             <NearbyServices />
@@ -218,12 +235,6 @@ export const HomeScreen = ({ navigation }) => {
                             />
 
                             <WeatherSection onFoodPress={(food) => console.log('Weather food pressed:', food)} />
-
-                            <HorizontalList
-                                title={t('home.picked_for_you')}
-                                data={pickedForYou}
-                                renderItem={renderRestaurantCard}
-                            />
 
                             <CollectionsGrid onCollectionPress={(collection) => console.log('Collection pressed:', collection)} />
 
@@ -242,6 +253,14 @@ export const HomeScreen = ({ navigation }) => {
                         />
                     )}
                 </ScrollView>
+
+                <AdvancedFilterModal
+                    visible={showFilterModal}
+                    onDismiss={() => setShowFilterModal(false)}
+                    onApply={() => setShowFilterModal(false)}
+                    onReset={() => { }}
+                    categories={categories}
+                />
             </View>
         </SafeAreaView>
     );

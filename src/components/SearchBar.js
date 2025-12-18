@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Animated } from 'react-native';
-import { Search, X, Sparkles } from 'lucide-react-native';
+import { Search, X, SlidersHorizontal } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../utils/theme';
 
@@ -8,51 +8,17 @@ export const SearchBar = ({
     value,
     onChangeText,
     placeholder,
-    aiPlaceholder,
-    onAIModeChange
+    onFilterPress
 }) => {
     const { t } = useTranslation();
     const [isFocused, setIsFocused] = React.useState(false);
-    const [isAIMode, setIsAIMode] = React.useState(false);
-    const aiGlowAnim = React.useRef(new Animated.Value(0)).current;
 
     const defaultPlaceholder = placeholder || t('search.search_placeholder');
-    const defaultAiPlaceholder = aiPlaceholder || `${t('search.search_placeholder')} (AI)`;
 
-    React.useEffect(() => {
-        if (isAIMode) {
-            // Pulsing glow animation
-            Animated.loop(
-                Animated.sequence([
-                    Animated.timing(aiGlowAnim, {
-                        toValue: 1,
-                        duration: 1500,
-                        useNativeDriver: false,
-                    }),
-                    Animated.timing(aiGlowAnim, {
-                        toValue: 0,
-                        duration: 1500,
-                        useNativeDriver: false,
-                    }),
-                ])
-            ).start();
-        } else {
-            aiGlowAnim.setValue(0);
-        }
-    }, [isAIMode]);
-
-    const toggleAIMode = () => {
-        const newMode = !isAIMode;
-        setIsAIMode(newMode);
-        if (onAIModeChange) {
-            onAIModeChange(newMode);
-        }
-    };
-
-    const aiScaleAnim = React.useRef(new Animated.Value(1)).current;
+    const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
     const handlePressIn = () => {
-        Animated.spring(aiScaleAnim, {
+        Animated.spring(scaleAnim, {
             toValue: 0.92,
             useNativeDriver: true,
             speed: 20,
@@ -60,28 +26,22 @@ export const SearchBar = ({
     };
 
     const handlePressOut = () => {
-        Animated.spring(aiScaleAnim, {
+        Animated.spring(scaleAnim, {
             toValue: 1,
             useNativeDriver: true,
             speed: 20,
         }).start();
     };
 
-    const glowOpacity = aiGlowAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.3, 0.8],
-    });
-
     return (
         <View style={[
             styles.container,
             isFocused && styles.containerFocused,
-            isAIMode && styles.containerAIMode
         ]}>
             <View style={styles.searchIconWrapper}>
                 <Search
                     size={20}
-                    color={isAIMode ? theme.colors.primary : (isFocused ? theme.colors.primary : '#6B7280')}
+                    color={isFocused ? theme.colors.primary : '#6B7280'}
                     strokeWidth={2.5}
                 />
             </View>
@@ -90,46 +50,27 @@ export const SearchBar = ({
                 style={styles.input}
                 value={value}
                 onChangeText={onChangeText}
-                placeholder={isAIMode ? defaultAiPlaceholder : defaultPlaceholder}
-                placeholderTextColor={isAIMode ? theme.colors.primaryLight : '#9CA3AF'}
+                placeholder={defaultPlaceholder}
+                placeholderTextColor={'#9CA3AF'}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 selectionColor={theme.colors.primary}
             />
 
-            {/* AI Mode Toggle Button */}
             <TouchableOpacity
-                onPress={toggleAIMode}
+                onPress={onFilterPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
-                style={styles.aiToggleButton}
-                activeOpacity={1} // Handled by scale animation
+                style={styles.filterButton}
+                activeOpacity={1}
             >
-                <Animated.View style={{ transform: [{ scale: aiScaleAnim }] }}>
-                    {isAIMode && (
-                        <Animated.View
-                            style={[
-                                styles.aiGlow,
-                                { opacity: glowOpacity }
-                            ]}
-                        />
-                    )}
-                    <View style={[
-                        styles.aiChip,
-                        isAIMode && styles.aiChipActive
-                    ]}>
-                        <Sparkles
-                            size={22}
-                            color={isAIMode ? '#FFFFFF' : theme.colors.primary}
+                <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                    <View style={styles.filterChip}>
+                        <SlidersHorizontal
+                            size={18}
+                            color={theme.colors.primary}
                             strokeWidth={2.5}
-                            fill={isAIMode ? '#FFFFFF' : 'transparent'}
                         />
-                        <Text style={[
-                            styles.aiText,
-                            isAIMode && styles.aiTextActive
-                        ]}>
-                            {t('search.ai_mode')}
-                        </Text>
                     </View>
                 </Animated.View>
             </TouchableOpacity>
@@ -156,7 +97,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 20, // Increased for friendlier shape (Gestalt)
         paddingHorizontal: 16,
-        paddingVertical: 12, // Slightly reduced to balance increased radius
+        paddingVertical: 8, // Reduced from 12 for smaller footprint
         marginHorizontal: 16,
         marginTop: 12, // More breathing room
         marginBottom: 20,
@@ -202,60 +143,29 @@ const styles = StyleSheet.create({
         letterSpacing: 0.3,
         height: '100%', // Ensure full height hit area
     },
-    aiToggleButton: {
+    filterButton: {
         position: 'relative',
         marginLeft: 4,
-        padding: 4, // Increase touch target (Fitts's Law)
+        padding: 4,
     },
-    aiGlow: {
-        position: 'absolute',
-        top: -8, // Larger glow area
-        left: -8,
-        right: -8,
-        bottom: -8,
-        borderRadius: 24,
-        backgroundColor: theme.colors.primary,
-        opacity: 0.3,
-    },
-    aiChip: {
-        flexDirection: 'row',
+    filterChip: {
+        width: 36, // Reduced from 44
+        height: 36, // Reduced from 44
         alignItems: 'center',
-        gap: 6,
-        paddingHorizontal: 14,
-        paddingVertical: 9,
-        borderRadius: 22,
+        justifyContent: 'center',
+        borderRadius: 10, // Slightly smaller radius to match smaller size
         backgroundColor: '#FFF0ED',
         borderWidth: 1.5,
         borderColor: '#FFD1C7',
-        shadowColor: theme.colors.primary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
-        shadowRadius: 4,
-        elevation: 2,
     },
-    aiChipActive: {
-        backgroundColor: theme.colors.primaryDark,
-        borderColor: '#D84315',
-        shadowColor: theme.colors.primaryDark,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.45,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    aiText: {
+    filterText: {
         fontSize: 13,
         fontWeight: '800',
         color: theme.colors.primaryDark,
         letterSpacing: 0.6,
-        textShadowColor: 'rgba(229, 80, 46, 0.1)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 1,
-    },
-    aiTextActive: {
-        color: '#FFFFFF',
     },
     clearButton: {
-        padding: 8, // Larger touch target (Fitts's Law)
+        padding: 8,
         marginRight: -4,
     },
     clearIconBg: {

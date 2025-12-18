@@ -81,9 +81,9 @@ const CategoryItem = ({ category, isSelected, onPress, index }) => {
     );
 };
 
-export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategory, onSeeMore }) => {
+export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategory, onSeeMore, style }) => {
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             {/* <View style={styles.header}>
                 <Text style={styles.title}>Categories</Text>
                 {onSeeMore && (
