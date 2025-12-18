@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Image, Animated, Dimensions } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from '../components/MapViewWrapper';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../utils/theme';
@@ -179,6 +179,8 @@ const EmptyState = ({ message }) => (
     </View>
 );
 
+import { lightMapStyle } from '../utils/mapStyles';
+
 const OrderDetailView = ({ orderId, navigation }) => {
     // For demo, if orderId is provided but not in ACTIVE_ORDERS, use a placeholder
     const order = ACTIVE_ORDERS.find(o => o.id === orderId) || {
@@ -214,6 +216,7 @@ const OrderDetailView = ({ orderId, navigation }) => {
                     <MapView
                         style={styles.map}
                         initialRegion={MOCK_LOCATION.initialRegion}
+                        customMapStyle={lightMapStyle}
                         showsUserLocation={true}
                         followsUserLocation={false}
                     // provider={PROVIDER_GOOGLE} // Uncomment for Google Maps

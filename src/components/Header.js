@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
-import { MapPin, ChevronDown, Settings, X, CreditCard, History, User, Bell, Shield } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, ScrollView } from 'react-native';
+import { MapPin, ChevronDown, Settings, X, CreditCard, History, User, Bell, Shield, ChevronRight, CloudSun, LogOut } from 'lucide-react-native';
 import { theme } from '../utils/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import * as Location from 'expo-location';
+import { Switch } from 'react-native';
+import LanguageSelector from './LanguageSelector';
 
 export const Header = () => {
     const [address, setAddress] = useState('Planet Earth, Milky Way 🚀');
     const [isLoading, setIsLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isWeatherThemeEnabled, setIsWeatherThemeEnabled] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -84,51 +88,109 @@ export const Header = () => {
                 </View>
 
                 <Modal
-                    animationType="fade"
+                    animationType="slide"
                     transparent={true}
                     visible={isMenuOpen}
                     onRequestClose={() => setIsMenuOpen(false)}
                 >
-                    <Pressable
-                        style={styles.modalOverlay}
-                        onPress={() => setIsMenuOpen(false)}
-                    >
+                    <BlurView intensity={30} style={styles.modalOverlay}>
+                        <Pressable
+                            style={styles.modalOverlayTap}
+                            onPress={() => setIsMenuOpen(false)}
+                        />
                         <View style={styles.modalContent}>
+                            <View style={styles.modalHandle} />
+
                             <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>Settings</Text>
+                                <View>
+                                    <Text style={styles.modalTitle}>Settings</Text>
+                                    <Text style={styles.modalSubtitle}>Manage your account and preferences</Text>
+                                </View>
                                 <TouchableOpacity
                                     onPress={() => setIsMenuOpen(false)}
                                     style={styles.closeButton}
                                 >
-                                    <X size={20} color={theme.colors.textSecondary} />
+                                    <X size={24} color={theme.colors.textSecondary} />
                                 </TouchableOpacity>
                             </View>
 
-                            <View style={styles.menuList}>
-                                <MenuItem icon={User} label="Profile" />
-                                <MenuItem icon={CreditCard} label="Payment Methods" />
-                                <MenuItem icon={History} label="Order History" />
-                                <MenuItem icon={Bell} label="Notifications" />
-                                <MenuItem icon={Shield} label="Privacy & Security" />
-                            </View>
+                            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.menuScroll}>
+                                <Text style={styles.sectionTitle}>Account</Text>
+                                <View style={styles.section}>
+                                    <MenuItem
+                                        icon={User}
+                                        label="Personal Information"
+                                        subtitle="Name, email, and phone number"
+                                    />
+                                    <MenuItem
+                                        icon={CreditCard}
+                                        label="Payment Methods"
+                                        subtitle="Cards, wallets, and more"
+                                    />
+                                    <MenuItem
+                                        icon={History}
+                                        label="Order History"
+                                        subtitle="Your past and current orders"
+                                    />
+                                </View>
 
-                            <View style={styles.comingSoonBadge}>
-                                <Text style={styles.comingSoonText}>✨ Features Coming Soon ✨</Text>
-                            </View>
+                                <Text style={styles.sectionTitle}>Preferences</Text>
+                                <View style={styles.section}>
+                                    <View style={styles.menuItem}>
+                                        <View style={styles.menuIconContainer}>
+                                            <CloudSun size={18} color={theme.colors.primary} />
+                                        </View>
+                                        <View style={styles.menuTextContainer}>
+                                            <Text style={styles.menuLabel}>Real-time Theme</Text>
+                                            <Text style={styles.menuSubtitle}>Adapts to local weather</Text>
+                                        </View>
+                                        <Switch
+                                            value={isWeatherThemeEnabled}
+                                            onValueChange={setIsWeatherThemeEnabled}
+                                            trackColor={{ false: '#D1D5DB', true: theme.colors.primaryLight }}
+                                            thumbColor={isWeatherThemeEnabled ? theme.colors.primary : '#F4F3F4'}
+                                        />
+                                    </View>
+                                    <LanguageSelector />
+                                    <MenuItem
+                                        icon={Bell}
+                                        label="Notifications"
+                                        subtitle="Push, email, and SMS"
+                                    />
+                                    <MenuItem
+                                        icon={Shield}
+                                        label="Privacy & Security"
+                                        subtitle="Password and data"
+                                    />
+                                </View>
+
+                                <TouchableOpacity style={styles.signOutButton}>
+                                    <LogOut size={18} color={theme.colors.error} />
+                                    <Text style={styles.signOutText}>Sign Out</Text>
+                                </TouchableOpacity>
+
+                                <View style={styles.footer}>
+                                    <Text style={styles.versionText}>Version 1.0.0 (Build 42)</Text>
+                                </View>
+                            </ScrollView>
                         </View>
-                    </Pressable>
+                    </BlurView>
                 </Modal>
             </LinearGradient>
         </View>
     );
 };
 
-const MenuItem = ({ icon: Icon, label }) => (
+const MenuItem = ({ icon: Icon, label, subtitle }) => (
     <TouchableOpacity style={styles.menuItem}>
         <View style={styles.menuIconContainer}>
             <Icon size={18} color={theme.colors.primary} />
         </View>
-        <Text style={styles.menuLabel}>{label}</Text>
+        <View style={styles.menuTextContainer}>
+            <Text style={styles.menuLabel}>{label}</Text>
+            {subtitle && <Text style={styles.menuSubtitle}>{subtitle}</Text>}
+        </View>
+        <ChevronRight size={16} color="#D1D5DB" />
     </TouchableOpacity>
 );
 
@@ -196,79 +258,135 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
-    avatarText: {
-        color: '#fff',
-        fontWeight: '800',
-        fontSize: 15,
-    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
-        paddingTop: 60,
-        paddingRight: 16,
+        justifyContent: 'flex-end', // Slide from bottom feel
+    },
+    modalOverlayTap: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
     },
     modalContent: {
-        width: 240,
         backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        padding: 20,
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        paddingTop: 12,
+        paddingHorizontal: 24,
+        paddingBottom: 40,
+        maxHeight: '85%',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
         shadowRadius: 12,
-        elevation: 10,
+        elevation: 20,
+    },
+    modalHandle: {
+        width: 40,
+        height: 4,
+        backgroundColor: '#E5E7EB',
+        borderRadius: 2,
+        alignSelf: 'center',
+        marginBottom: 20,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
+        alignItems: 'flex-start',
+        marginBottom: 24,
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: '800',
-        color: '#1F2937',
+        color: '#111827',
+        marginBottom: 4,
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#6B7280',
+        fontWeight: '500',
     },
     closeButton: {
-        padding: 4,
+        backgroundColor: '#F3F4F6',
+        padding: 8,
+        borderRadius: 12,
     },
-    menuList: {
-        marginBottom: 20,
+    menuScroll: {
+        paddingBottom: 20,
+    },
+    sectionTitle: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#9CA3AF',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: 12,
+        marginTop: 8,
+    },
+    section: {
+        backgroundColor: '#F9FAFB',
+        borderRadius: 20,
+        padding: 4,
+        marginBottom: 24,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        padding: 12,
+        backgroundColor: 'transparent',
     },
     menuIconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        backgroundColor: '#F3F4F6',
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
+        marginRight: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    menuTextContainer: {
+        flex: 1,
     },
     menuLabel: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '600',
-        color: '#4B5563',
+        color: '#1F2937',
+        marginBottom: 2,
     },
-    comingSoonBadge: {
-        backgroundColor: '#F3F4F6',
-        borderRadius: 12,
-        paddingVertical: 8,
+    menuSubtitle: {
+        fontSize: 12,
+        color: '#6B7280',
+    },
+    signOutButton: {
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        backgroundColor: '#FEF2F2',
+        borderRadius: 16,
+        marginTop: 8,
+        gap: 8,
     },
-    comingSoonText: {
-        fontSize: 11,
+    signOutText: {
+        fontSize: 16,
         fontWeight: '700',
-        color: theme.colors.primary,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
+        color: theme.colors.error,
+    },
+    footer: {
+        alignItems: 'center',
+        marginTop: 32,
+    },
+    versionText: {
+        fontSize: 12,
+        color: '#9CA3AF',
+        fontWeight: '500',
     }
 });

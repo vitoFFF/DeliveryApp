@@ -79,7 +79,7 @@ export const venues = [
         name: 'PSP',
         rating: 4.7,
         deliveryTime: '20-30 min',
-        image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80', // Pharmacy
+        image: 'https://images.unsplash.com/photo--cbe660dbde88?w=800&q=80', // Pharmacy
         categories: ['Medicine', 'Personal Care'],
         priceRange: '$$',
     },

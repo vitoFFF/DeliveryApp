@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Dimensions } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from './MapViewWrapper';
 import * as Location from 'expo-location';
 import { Truck, Bike } from 'lucide-react-native';
 import { theme } from '../utils/theme';
+
+import { lightMapStyle } from '../utils/mapStyles';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +47,7 @@ export const NearbyDrivers = () => {
                         latitudeDelta: 0.02,
                         longitudeDelta: 0.02,
                     }}
+                    customMapStyle={lightMapStyle}
                     showsUserLocation={true}
                     scrollEnabled={false}
                     zoomEnabled={false}

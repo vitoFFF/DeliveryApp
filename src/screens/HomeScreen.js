@@ -1,16 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity, LayoutChangeEvent, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, Image, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    useAnimatedScrollHandler,
-    interpolate,
-    Extrapolate
-} from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
 
 import { Header } from '../components/Header';
 import { SearchBar } from '../components/SearchBar';
@@ -48,11 +40,6 @@ export const HomeScreen = ({ navigation }) => {
     // Responsive dimensions
     const cardWidth = Math.min(screenWidth * 0.75, 350); // 75% quite standard, max 350 for tablets
     const drinkCardWidth = Math.min(screenWidth * 0.45, 200); // Smaller cards
-
-    // Animation Values
-    const scrollY = useSharedValue(0);
-    const [headerHeight, setHeaderHeight] = useState(60); // Default guess
-    const [stickyHeight, setStickyHeight] = useState(120); // Search + Filter guess
 
     // Reset category when home tab is pressed
     useFocusEffect(
@@ -161,36 +148,7 @@ export const HomeScreen = ({ navigation }) => {
         );
     };
 
-    // Scroll Handler
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            scrollY.value = event.contentOffset.y;
-        },
-    });
 
-    const headerAnimatedStyle = useAnimatedStyle(() => {
-        return {
-            transform: [
-                {
-                    translateY: interpolate(
-                        scrollY.value,
-                        [0, headerHeight],
-                        [0, -headerHeight],
-                        Extrapolate.CLAMP
-                    ),
-                },
-            ],
-        };
-    });
-
-    // Measurement handlers
-    const onHeaderLayout = (e) => {
-        setHeaderHeight(e.nativeEvent.layout.height);
-    };
-
-    const onStickyLayout = (e) => {
-        setStickyHeight(e.nativeEvent.layout.height);
-    };
 
     if (loading) {
         return (
@@ -223,21 +181,15 @@ export const HomeScreen = ({ navigation }) => {
             <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
             <View style={styles.container}>
 
-                {/* Collapsible Header Container */}
-                <Animated.View
-                    style={[
-                        styles.fixedHeaderContainer,
-                        headerAnimatedStyle,
-                        { zIndex: 100 } // Ensure it stays on top
-                    ]}
-                >
-                    {/* Glassmorphism Background */}
-                    <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+                <View style={styles.fixedHeader}>
+                    <Header />
+                </View>
 
-                    <View onLayout={onHeaderLayout} style={styles.collapsiblePart}>
-                        <Header />
-                    </View>
-                    <View onLayout={onStickyLayout} style={styles.stickyPart}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.scrollContent}
+                >
+                    <View style={styles.stickyPart}>
                         <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
                         <FilterChips
                             filters={filters}
@@ -245,18 +197,7 @@ export const HomeScreen = ({ navigation }) => {
                             onSelect={setSelectedFilter}
                         />
                     </View>
-                </Animated.View>
 
-                {/* Main Scroll Content */}
-                <Animated.ScrollView
-                    onScroll={scrollHandler}
-                    scrollEventThrottle={16}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={[
-                        styles.scrollContent,
-                        { paddingTop: headerHeight + stickyHeight + 16 } // Add padding for absolute header
-                    ]}
-                >
                     <CategoryCarousel
                         categories={categories.slice(0, 6)}
                         selectedCategory={selectedCategory}
@@ -300,7 +241,7 @@ export const HomeScreen = ({ navigation }) => {
                             onRestaurantPress={handleRestaurantPress}
                         />
                     )}
-                </Animated.ScrollView>
+                </ScrollView>
             </View>
         </SafeAreaView>
     );
@@ -314,30 +255,17 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    fixedHeaderContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'transparent', // Make transparent for BlurView
-    },
-    collapsiblePart: {
-        // Wrapper for header
-        zIndex: 1,
+    fixedHeader: {
+        backgroundColor: theme.colors.background,
+        zIndex: 100,
     },
     stickyPart: {
-        // Wrapper for search + filters
-        backgroundColor: 'transparent', // Transparent to let BlurView show
         paddingBottom: 8,
-        shadowColor: "#000", // Optional: Add a subtle shadow when stuck
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 3,
     },
     scrollContent: {
+        paddingTop: 6,
         paddingBottom: theme.spacing.xl * 2,
-        gap: 24,
+        gap: 4,
     },
     horizontalCard: {
         width: 280,

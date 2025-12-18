@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Dimensions } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Marker, Callout } from './MapViewWrapper';
 import * as Location from 'expo-location';
 import { Utensils, Store, Cross, PlusSquare } from 'lucide-react-native';
 import { theme } from '../utils/theme';
+
+import { lightMapStyle } from '../utils/mapStyles';
 
 const { width } = Dimensions.get('window');
 
@@ -67,6 +69,7 @@ export const NearbyServices = () => {
                         latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
                     }}
+                    customMapStyle={lightMapStyle}
                     showsUserLocation={true}
                     scrollEnabled={true}
                     zoomEnabled={true}

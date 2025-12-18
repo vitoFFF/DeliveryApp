@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Languages } from 'lucide-react-native';
 import { theme } from '../utils/theme';
 
 const LanguageSelector = () => {
@@ -12,7 +13,17 @@ const LanguageSelector = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>{t('language.change_language')}</Text>
+            <View style={styles.headerRow}>
+                <View style={styles.iconContainer}>
+                    <Languages size={18} color={theme.colors.primary} />
+                </View>
+                <View style={styles.textContainer}>
+                    <Text style={styles.label}>{t('language.change_language')}</Text>
+                    <Text style={styles.subtitle}>
+                        {i18n.language === 'en' ? 'English' : i18n.language === 'ka' ? 'ქართული' : 'Русский'}
+                    </Text>
+                </View>
+            </View>
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     style={[
@@ -27,7 +38,7 @@ const LanguageSelector = () => {
                             i18n.language === 'en' && styles.activeButtonText,
                         ]}
                     >
-                        English
+                        EN
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -43,7 +54,23 @@ const LanguageSelector = () => {
                             i18n.language === 'ka' && styles.activeButtonText,
                         ]}
                     >
-                        ქართული
+                        KA
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        i18n.language === 'ru' && styles.activeButton,
+                    ]}
+                    onPress={() => changeLanguage('ru')}
+                >
+                    <Text
+                        style={[
+                            styles.buttonText,
+                            i18n.language === 'ru' && styles.activeButtonText,
+                        ]}
+                    >
+                        RU
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -53,34 +80,61 @@ const LanguageSelector = () => {
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 20,
-        paddingHorizontal: 20,
+        padding: 12,
     },
-    title: {
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    iconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    textContainer: {
+        flex: 1,
+    },
+    label: {
         fontSize: 16,
         fontWeight: '600',
-        marginBottom: 10,
-        color: theme.colors.text,
+        color: '#1F2937',
+        marginBottom: 2,
+    },
+    subtitle: {
+        fontSize: 12,
+        color: '#6B7280',
     },
     buttonContainer: {
         flexDirection: 'row',
-        gap: 10,
+        gap: 8,
+        marginLeft: 56, // Align with the start of the text (40px icon + 16px margin)
     },
     button: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: theme.colors.border,
-        backgroundColor: theme.colors.background,
+        borderColor: '#E5E7EB',
+        backgroundColor: '#FFFFFF',
     },
     activeButton: {
         backgroundColor: theme.colors.primary,
         borderColor: theme.colors.primary,
     },
     buttonText: {
-        color: theme.colors.text,
-        fontSize: 14,
+        color: '#4B5563',
+        fontSize: 13,
+        fontWeight: '600',
     },
     activeButtonText: {
         color: '#FFFFFF',

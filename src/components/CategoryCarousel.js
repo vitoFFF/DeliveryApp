@@ -84,14 +84,14 @@ const CategoryItem = ({ category, isSelected, onPress, index }) => {
 export const CategoryCarousel = ({ categories, selectedCategory, onSelectCategory, onSeeMore }) => {
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <Text style={styles.title}>Categories</Text>
                 {onSeeMore && (
                     <TouchableOpacity onPress={onSeeMore} style={styles.seeMoreButton}>
                         <Text style={styles.seeMoreText}>See More</Text>
                     </TouchableOpacity>
                 )}
-            </View>
+            </View> */}
 
             <ScrollView
                 horizontal
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: theme.spacing.m,
-        marginBottom: 16,
+        marginBottom: 8,
     },
     title: {
         fontSize: 20,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,

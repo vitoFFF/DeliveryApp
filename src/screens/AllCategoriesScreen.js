@@ -77,6 +77,8 @@ const CategoryItem = ({ category, onPress, index }) => {
     );
 };
 
+import { Header } from '../components/Header';
+
 export const AllCategoriesScreen = ({ navigation, route }) => {
     const { t } = useTranslation();
     const { categories } = route.params || { categories: [] };
@@ -96,6 +98,9 @@ export const AllCategoriesScreen = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+            <View style={styles.fixedHeader}>
+                <Header />
+            </View>
             <View style={styles.container}>
                 <FlatList
                     data={categories}
@@ -119,6 +124,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    fixedHeader: {
+        backgroundColor: theme.colors.background,
+        zIndex: 100,
+    },
     listContent: {
         padding: theme.spacing.m,
         paddingBottom: theme.spacing.xl,
@@ -140,7 +149,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,

@@ -4,10 +4,12 @@ import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import en from './locales/en.json';
 import ka from './locales/ka.json';
+import ru from './locales/ru.json';
 
 const RESOURCES = {
     en: { translation: en },
     ka: { translation: ka },
+    ru: { translation: ru },
 };
 
 const LANGUAGE_DETECTOR = {

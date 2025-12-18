@@ -56,7 +56,7 @@ export const MainNavigator = () => {
                 options={{
                     tabBarLabel: 'AI Hub',
                     isBigButton: true, // Custom prop for big middle button
-                    tabBarButtonColor: '#502d05ff', // Custom background color
+                    tabBarButtonColor: '#dcd7d2a9', // Indigo (modern AI theme)
                 }}
             />
             <Tab.Screen
