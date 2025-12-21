@@ -1,15 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { theme } from '../utils/theme';
-
-// Mock weather data
-// TODO: Integrate with a real weather API
-const WEATHER_STATE = {
-    condition: 'Rainy',
-    icon: '🌧️',
-    temp: '18°C',
-    message: 'Rainy Day Comforts',
-};
+import { getWeatherData } from '../api/weatherService';
 
 // Mock food suggestions for the weather
 // TODO: Replace with AI-driven recommendations based on weather
@@ -41,14 +33,45 @@ const WEATHER_FOODS = [
 ];
 
 export const WeatherSection = ({ onFoodPress }) => {
+    const [weather, setWeather] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchWeather = async () => {
+            setIsLoading(true);
+            const data = await getWeatherData();
+            setWeather(data);
+            setIsLoading(false);
+        };
+
+        fetchWeather();
+    }, []);
+
+    // Show loading state
+    if (isLoading) {
+        return (
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <View style={[styles.weatherInfo, styles.loadingContainer]}>
+                        <ActivityIndicator size="small" color={theme.colors.primary} />
+                        <Text style={styles.loadingText}>Getting weather...</Text>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
+    // Show weather data (or fallback if error)
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.weatherInfo}>
-                    <Text style={styles.weatherIcon}>{WEATHER_STATE.icon}</Text>
+                    <Text style={styles.weatherIcon}>{weather?.icon || '🌡️'}</Text>
                     <View>
-                        <Text style={styles.conditionText}>{WEATHER_STATE.condition} • {WEATHER_STATE.temp}</Text>
-                        <Text style={styles.messageText}>{WEATHER_STATE.message}</Text>
+                        <Text style={styles.conditionText}>
+                            {weather?.condition || 'Weather'} • {weather?.temp || '--°C'}
+                        </Text>
+                        <Text style={styles.messageText}>{weather?.message || 'Food For Any Weather'}</Text>
                     </View>
                 </View>
             </View>
@@ -76,6 +99,7 @@ export const WeatherSection = ({ onFoodPress }) => {
     );
 };
 
+
 const styles = StyleSheet.create({
     container: {
         marginBottom: 24,
@@ -91,6 +115,14 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 16,
         ...theme.shadows.small,
+    },
+    loadingContainer: {
+        justifyContent: 'center',
+        gap: 8,
+    },
+    loadingText: {
+        fontSize: 14,
+        color: theme.colors.textSecondary,
     },
     weatherIcon: {
         fontSize: 32,
