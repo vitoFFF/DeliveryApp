@@ -1,4 +1,4 @@
-import * as Location from 'expo-location';
+
 
 const OPEN_METEO_BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 
@@ -65,74 +65,17 @@ const getWeatherMessage = (category, tempCelsius) => {
 };
 
 /**
- * Request location permissions from the user
- */
-export const requestLocationPermission = async () => {
-    console.log('Requesting location permission...');
-    try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        console.log('Location permission status:', status);
-        return status === 'granted';
-    } catch (error) {
-        console.error('Error requesting location permission:', error);
-        return false;
-    }
-};
-
-/**
  * Get the user's current location with timeout
  * Falls back to default location (Dubai) if location fails
  */
 export const getCurrentLocation = async () => {
-    // Default location (Dubai) as fallback
-    const DEFAULT_LOCATION = {
-        latitude: 25.2048,
-        longitude: 55.2708,
+    // Default location (Ozurgeti)
+    const OZURGETI_LOCATION = {
+        latitude: 41.9214,
+        longitude: 42.0019,
     };
-
-    try {
-        const hasPermission = await requestLocationPermission();
-
-        if (!hasPermission) {
-            console.log('Location permission denied, using default location');
-            return DEFAULT_LOCATION;
-        }
-
-        // Create a promise that rejects after timeout
-        const timeout = (ms) => new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Location request timed out')), ms)
-        );
-
-        try {
-            // Try to get last known location first (faster)
-            const lastKnown = await Location.getLastKnownPositionAsync();
-            if (lastKnown) {
-                console.log('Using last known location');
-                return {
-                    latitude: lastKnown.coords.latitude,
-                    longitude: lastKnown.coords.longitude,
-                };
-            }
-        } catch (e) {
-            console.log('No last known location available');
-        }
-
-        // Race between getting current position and timeout
-        const location = await Promise.race([
-            Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Low,
-            }),
-            timeout(5000), // 5 second timeout
-        ]);
-
-        return {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-        };
-    } catch (error) {
-        console.log('Location error, using default:', error.message);
-        return DEFAULT_LOCATION;
-    }
+    console.log('Using default location: Ozurgeti');
+    return OZURGETI_LOCATION;
 };
 
 /**
@@ -141,19 +84,26 @@ export const getCurrentLocation = async () => {
 export const fetchWeather = async (latitude, longitude) => {
     const url = `${OPEN_METEO_BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`;
 
-    const response = await fetch(url);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
 
-    if (!response.ok) {
-        throw new Error(`Weather API error: ${response.status}`);
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+
+        if (!response.ok) {
+            throw new Error(`Weather API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.reason || 'Weather API error');
+        }
+
+        return data;
+    } finally {
+        clearTimeout(timeoutId);
     }
-
-    const data = await response.json();
-
-    if (data.error) {
-        throw new Error(data.reason || 'Weather API error');
-    }
-
-    return data;
 };
 
 /**
@@ -173,54 +123,40 @@ export const getWeatherData = async () => {
         error: 'Could not get weather',
     };
 
-    // Create timeout promise
-    const timeoutPromise = new Promise((resolve) => {
-        setTimeout(() => {
-            console.log('Weather fetch timed out, using fallback');
-            resolve(fallbackData);
-        }, 15000); // 15 second total timeout
-    });
+    try {
+        console.log('Starting weather fetch...');
 
-    // Create weather fetch promise
-    const weatherPromise = (async () => {
-        try {
-            console.log('Starting weather fetch...');
+        // Get user's location
+        console.log('Getting location...');
+        const { latitude, longitude } = await getCurrentLocation();
+        console.log('Location obtained:', latitude, longitude);
 
-            // Get user's location
-            console.log('Getting location...');
-            const { latitude, longitude } = await getCurrentLocation();
-            console.log('Location obtained:', latitude, longitude);
+        // Fetch weather from API
+        console.log('Fetching weather from API...');
+        const data = await fetchWeather(latitude, longitude);
+        console.log('Weather data received:', data);
 
-            // Fetch weather from API
-            console.log('Fetching weather from API...');
-            const data = await fetchWeather(latitude, longitude);
-            console.log('Weather data received:', data);
+        // Extract current weather info
+        const weatherCode = data.current.weather_code;
+        const temperature = Math.round(data.current.temperature_2m);
 
-            // Extract current weather info
-            const weatherCode = data.current.weather_code;
-            const temperature = Math.round(data.current.temperature_2m);
+        // Get weather details from WMO code mapping
+        const weatherInfo = WMO_CODES[weatherCode] || DEFAULT_WEATHER;
 
-            // Get weather details from WMO code mapping
-            const weatherInfo = WMO_CODES[weatherCode] || DEFAULT_WEATHER;
+        // Generate weather message
+        const message = getWeatherMessage(weatherInfo.category, temperature);
 
-            // Generate weather message
-            const message = getWeatherMessage(weatherInfo.category, temperature);
-
-            return {
-                success: true,
-                condition: weatherInfo.condition,
-                icon: weatherInfo.icon,
-                temp: `${temperature}°C`,
-                temperature, // raw number for logic
-                message,
-                category: weatherInfo.category,
-            };
-        } catch (error) {
-            console.error('Error fetching weather:', error.message);
-            return { ...fallbackData, error: error.message };
-        }
-    })();
-
-    // Race between weather fetch and timeout
-    return Promise.race([weatherPromise, timeoutPromise]);
+        return {
+            success: true,
+            condition: weatherInfo.condition,
+            icon: weatherInfo.icon,
+            temp: `${temperature}°C`,
+            temperature, // raw number for logic
+            message,
+            category: weatherInfo.category,
+        };
+    } catch (error) {
+        console.error('Error fetching weather:', error.message);
+        return { ...fallbackData, error: error.message };
+    }
 };
