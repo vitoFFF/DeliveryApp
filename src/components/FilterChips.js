@@ -29,7 +29,12 @@ export const FilterChips = ({ filters, selectedFilter, onSelect }) => {
                     // Conditionally render Gradient or View based on selection
                     const Container = isSelected ? LinearGradient : View;
                     const containerProps = isSelected
-                        ? { colors: [theme.colors.primary, theme.colors.primaryLight], start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, style: [styles.chip, styles.chipSelected] }
+                        ? {
+                            colors: ['#F97316', '#FB923C', '#FDBA74'],
+                            start: { x: 0, y: 0 },
+                            end: { x: 1, y: 1 },
+                            style: [styles.chip, styles.chipSelected]
+                        }
                         : { style: [styles.chip, styles.chipUnselected] };
 
                     return (
@@ -58,55 +63,58 @@ export const FilterChips = ({ filters, selectedFilter, onSelect }) => {
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 24, // Increased spacing from content below
+        marginBottom: 8,
     },
     scrollContent: {
         paddingHorizontal: 16,
-        paddingVertical: 4, // Allow space for shadow
-        gap: 12, // Modern spacing
+        paddingVertical: 8,
+        gap: 10,
     },
     touchable: {
-        borderRadius: 30, // Matches chip border radius
+        borderRadius: 24,
     },
     chip: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 12, // Taller pill
-        borderRadius: 30,
-        gap: 8,
+        paddingHorizontal: 18,
+        paddingVertical: 11,
+        borderRadius: 24,
+        gap: 7,
+        borderWidth: 1.5,
     },
     chipUnselected: {
-        backgroundColor: '#FFFFFF', // Clean white
-        // Very subtle modern shadow instead of border
-        shadowColor: "#000",
+        backgroundColor: '#FAFBFC',
+        borderColor: '#E8EAED',
+        shadowColor: "#1F2937",
         shadowOffset: {
             width: 0,
-            height: 1,
+            height: 2,
         },
-        shadowOpacity: 0.08,
-        shadowRadius: 2.50,
-        elevation: 1,
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
     },
     chipSelected: {
-        // Gradient handled in props
+        borderColor: 'transparent',
         shadowColor: theme.colors.primary,
         shadowOffset: {
             width: 0,
-            height: 4,
+            height: 6,
         },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
+        shadowOpacity: 0.35,
+        shadowRadius: 12,
+        elevation: 8,
+        transform: [{ scale: 1.02 }],
     },
     chipText: {
-        fontSize: 14,
+        fontSize: 13.5,
         fontWeight: '600',
-        color: theme.colors.textSecondary, // Softer text color for unselected
-        letterSpacing: 0.3,
+        color: '#4B5563',
+        letterSpacing: 0.2,
     },
     chipTextSelected: {
         color: '#FFFFFF',
         fontWeight: '700',
+        letterSpacing: 0.3,
     },
 });

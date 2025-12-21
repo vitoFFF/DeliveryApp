@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { theme } from '../utils/theme';
 
-export const HorizontalList = ({ title, data, renderItem }) => {
+export const HorizontalList = ({ title, data, renderItem, style }) => {
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <View style={styles.header}>
                 <Text style={styles.title}>{title}</Text>
                 <TouchableOpacity>

@@ -213,30 +213,41 @@ export const HomeScreen = ({ navigation }) => {
                         selectedCategory={selectedCategory}
                         onSelectCategory={handleCategorySelect}
                         onSeeMore={handleSeeAllCategories}
-                        style={{ marginBottom: 28 }}
+                        style={{ marginBottom: 10 }} //spacing
                     />
 
                     {!selectedCategory && !searchQuery ? (
                         <>
+                            <SpecialOffersHero
+                                onOfferPress={(offer) => console.log('Offer pressed:', offer)}
+                                style={{ marginBottom: 24 }}
+                            />
+
                             <HorizontalList
                                 title={t('home.picked_for_you')}
                                 data={pickedForYou}
                                 renderItem={renderRestaurantCard}
+                                style={{ marginBottom: 40 }}
                             />
 
-                            <SpecialOffersHero onOfferPress={(offer) => console.log('Offer pressed:', offer)} />
-
-                            <NearbyServices />
+                            <NearbyServices style={{ marginBottom: 40 }} />
 
                             <HorizontalList
                                 title={t('home.meals_under')}
                                 data={mealsUnderX}
                                 renderItem={renderProductCard}
+                                style={{ marginBottom: 24 }}
                             />
 
-                            <WeatherSection onFoodPress={(food) => console.log('Weather food pressed:', food)} />
+                            <WeatherSection
+                                onFoodPress={(food) => console.log('Weather food pressed:', food)}
+                                style={{ marginBottom: 24 }}
+                            />
 
-                            <CollectionsGrid onCollectionPress={(collection) => console.log('Collection pressed:', collection)} />
+                            <CollectionsGrid
+                                onCollectionPress={(collection) => console.log('Collection pressed:', collection)}
+                                style={{ marginBottom: 24 }}
+                            />
 
                             <VerticalList
                                 title={t('home.popular_now')}

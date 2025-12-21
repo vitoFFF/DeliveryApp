@@ -33,7 +33,7 @@ const generateRandomServices = (count) => {
     });
 };
 
-export const NearbyServices = () => {
+export const NearbyServices = ({ style }) => {
     const [services, setServices] = useState(generateRandomServices(6));
     const [tracksViewChanges, setTracksViewChanges] = useState(true);
 
@@ -53,7 +53,7 @@ export const NearbyServices = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <View style={styles.header}>
                 <Text style={styles.title}>Services Near You</Text>
                 <View style={styles.badge}>
