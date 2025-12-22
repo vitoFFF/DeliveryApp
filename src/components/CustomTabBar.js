@@ -1,39 +1,32 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
+
+import React, { useState } from 'react';
+import { View, TouchableOpacity, StyleSheet, Platform, Dimensions, Modal, Pressable, Image } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming, interpolate, Extrapolate, Easing } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
+import { BlurView } from 'expo-blur';
 import { selectCartCount } from '../store/cartSlice';
 import { theme } from '../utils/theme';
 import { Text as RNText } from 'react-native';
+import { Home, MessageSquare, LifeBuoy } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
-// Custom tab bar shape with configurable cutout parameters
 const TabBarShape = () => {
     const tabWidth = width - 20;
     const center = tabWidth / 2;
-
-    // ===== CUTOUT PARAMETERS - Easy to configure =====
-    const cutoutWidth = 74;            // Slightly wider for breathing room
-    const cutoutDepth = 52;             // How deep the arc goes down
-    const cutoutCornerRadius = 22;       // Smoothness entering the cutout
-    const topCornerRadius = 40;         // Top corners of tab bar
-    const bottomCornerRadius = 40;      // Bottom corners of tab bar
-
-    // Button specs (matches bigIconContainer)
+    const cutoutWidth = 74;
+    const cutoutDepth = 52;
+    const cutoutCornerRadius = 22;
+    const topCornerRadius = 40;
+    const bottomCornerRadius = 40;
     const buttonDiameter = 60;
-    const buttonRadius = buttonDiameter / 2; // 30px
-
-    // Magic constant for perfect circle with cubic Bezier
-    const k = 0.5522847498; // (4/3) * tan(π/8)
+    const buttonRadius = buttonDiameter / 2;
+    const k = 0.5522847498;
     const controlDistance = k * buttonRadius;
-
-    // Calculate cutout arc points
     const leftX = center - cutoutWidth / 2;
     const rightX = center + cutoutWidth / 2;
 
-    // SVG Path with smooth cutout entry
     const d = `
         M 0 ${topCornerRadius}
         Q 0 0 ${topCornerRadius} 0
@@ -53,11 +46,10 @@ const TabBarShape = () => {
 
     return (
         <Svg width={tabWidth} height={80} viewBox={`0 0 ${tabWidth} 80`} style={StyleSheet.absoluteFill}>
-            {/* Main tab bar shape - LIGHT THEME WITH BORDER */}
             <Path
                 d={d}
                 fill="white"
-                stroke="#E5E7EB" // Light gray border for definition
+                stroke="#E5E7EB"
                 strokeWidth="1.5"
             />
         </Svg>
@@ -65,49 +57,137 @@ const TabBarShape = () => {
 };
 
 export const CustomTabBar = ({ state, descriptors, navigation }) => {
+    const [isMenuOpen, setMenuOpen] = useState(false);
+    const rotation = useSharedValue(0);
+    const menuProgress = useSharedValue(0);
+
+    const toggleMenu = () => {
+        const toValue = isMenuOpen ? 0 : 1;
+        setMenuOpen(!isMenuOpen);
+        rotation.value = withTiming(isMenuOpen ? 0 : 360, { duration: 400, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
+        menuProgress.value = withTiming(toValue, { duration: 300, easing: Easing.out(Easing.exp) });
+    };
+
+    const closeMenu = () => {
+        setMenuOpen(false);
+        rotation.value = withTiming(0, { duration: 400, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
+        menuProgress.value = withTiming(0, { duration: 300, easing: Easing.out(Easing.exp) });
+    };
+
+    const navigateAndClose = (screen) => {
+        if (screen === 'AIChat') {
+            navigation.navigate('AIHub', { screen: 'AIChat' });
+        } else {
+            navigation.navigate(screen);
+        }
+        closeMenu();
+    };
+
+    const animatedRotation = useAnimatedStyle(() => {
+        return {
+            transform: [{ rotate: `${rotation.value}deg` }],
+        };
+    });
+
+    const menuItems = [
+        { icon: <Home color="white" size={24} />, screen: 'AIHub', label: 'AI Hub' },
+        { icon: <Image source={require('../../assets/robot.png')} style={{ width: 38, height: 38 }} resizeMode="contain" />, screen: 'AIChat', label: 'AI Chat' },
+        { icon: <LifeBuoy color="white" size={24} />, screen: 'Support', label: 'Support' },
+    ];
+
     return (
-        <View style={styles.container}>
-            <TabBarShape />
-            <View style={styles.tabBarContainer}>
-                {state.routes.map((route, index) => {
-                    const { options } = descriptors[route.key];
-                    const isFocused = state.index === index;
+        <>
+            <Modal
+                transparent
+                visible={isMenuOpen}
+                onRequestClose={closeMenu}
+            >
+                <Pressable style={styles.modalBackdrop} onPress={closeMenu}>
+                    <BlurView
+                        style={StyleSheet.absoluteFill}
+                        tint="dark"
+                        intensity={80}
+                    />
+                    <View style={[StyleSheet.absoluteFill, styles.backdropTint]} />
+                </Pressable>
+                <View style={styles.menuContainer}>
+                    {menuItems.map((item, index) => {
+                        const angle = -45 - (index * 45);
+                        const animatedStyle = useAnimatedStyle(() => {
+                            const radians = (angle * Math.PI) / 180;
+                            const x = Math.cos(radians) * 100;
+                            const y = Math.sin(radians) * 100;
 
-                    const onPress = () => {
-                        const event = navigation.emit({
-                            type: 'tabPress',
-                            target: route.key,
-                            canPreventDefault: true,
+                            return {
+                                opacity: menuProgress.value,
+                                transform: [
+                                    { translateX: interpolate(menuProgress.value, [0, 1], [0, x], Extrapolate.CLAMP) },
+                                    { translateY: interpolate(menuProgress.value, [0, 1], [0, y], Extrapolate.CLAMP) },
+                                    { scale: interpolate(menuProgress.value, [0, 1], [0.5, 1], Extrapolate.CLAMP) }
+                                ],
+                            };
                         });
-                        if (!isFocused && !event.defaultPrevented) {
-                            navigation.navigate(route.name);
-                        }
-                    };
+                        return (
+                            <Animated.View key={item.screen} style={[styles.menuItem, animatedStyle]}>
+                                <TouchableOpacity style={styles.menuButton} onPress={() => navigateAndClose(item.screen)}>
+                                    {item.icon}
+                                </TouchableOpacity>
+                            </Animated.View>
+                        );
+                    })}
+                </View>
 
-                    const onLongPress = () => {
-                        navigation.emit({
-                            type: 'tabLongPress',
-                            target: route.key,
-                        });
-                    };
+            </Modal>
 
-                    return (
-                        <TabBarButton
-                            key={route.key}
-                            onPress={onPress}
-                            onLongPress={onLongPress}
-                            isFocused={isFocused}
-                            options={options}
-                            routeName={route.name}
-                        />
-                    );
-                })}
+            <View style={styles.container}>
+                <TabBarShape />
+                <View style={styles.tabBarContainer}>
+                    {state.routes.map((route, index) => {
+                        const { options } = descriptors[route.key];
+                        const isFocused = state.index === index;
+
+                        const onPress = () => {
+                            if (options.isBigButton) {
+                                toggleMenu();
+                                return;
+                            }
+
+                            const event = navigation.emit({
+                                type: 'tabPress',
+                                target: route.key,
+                                canPreventDefault: true,
+                            });
+                            if (!isFocused && !event.defaultPrevented) {
+                                navigation.navigate(route.name);
+                            }
+                        };
+
+                        const onLongPress = () => {
+                            navigation.emit({
+                                type: 'tabLongPress',
+                                target: route.key,
+                            });
+                        };
+
+                        return (
+                            <TabBarButton
+                                key={route.key}
+                                onPress={onPress}
+                                onLongPress={onLongPress}
+                                isFocused={isFocused}
+                                options={options}
+                                routeName={route.name}
+                                rotation={options.isBigButton ? animatedRotation : {}}
+                            />
+                        );
+                    })}
+                </View>
             </View>
-        </View>
+        </>
     );
 };
 
-const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) => {
+const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName, rotation }) => {
     const scale = useSharedValue(1);
     const translateY = useSharedValue(0);
     const isBigButton = options.isBigButton || false;
@@ -115,16 +195,17 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
     const isCart = routeName === 'Cart';
 
     React.useEffect(() => {
-        if (isFocused) {
-            translateY.value = withSpring(isBigButton ? -8 : -8, { damping: 12 });
-            scale.value = withSpring(isBigButton ? 1.08 : 1.1);
-        } else {
-            translateY.value = withSpring(0);
-            scale.value = withSpring(1);
+        if (isFocused && !isBigButton) {
+            translateY.value = withTiming(-8, { duration: 200 });
+            scale.value = withTiming(1.1, { duration: 200 });
+        } else if (!isBigButton) {
+            translateY.value = withTiming(0, { duration: 200 });
+            scale.value = withTiming(1, { duration: 200 });
         }
     }, [isFocused, isBigButton]);
 
     const animatedStyle = useAnimatedStyle(() => {
+        if (isBigButton) return {};
         return {
             transform: [{ translateY: translateY.value }, { scale: scale.value }],
         };
@@ -133,18 +214,19 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
     return (
         <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={styles.tabButton} activeOpacity={0.7}>
             <Animated.View style={[styles.innerButton, animatedStyle]}>
-                <View style={[
+                <Animated.View style={[
                     styles.iconContainer,
                     isBigButton && styles.bigIconContainer,
                     isBigButton && options.tabBarButtonColor && {
                         backgroundColor: options.tabBarButtonColor,
                         shadowColor: options.tabBarButtonColor
                     },
-                    isFocused && (isBigButton ? styles.activeBigIconContainer : styles.activeIconContainer)
+                    isFocused && !isBigButton && styles.activeIconContainer,
+                    rotation
                 ]}>
                     {options.tabBarIcon &&
                         options.tabBarIcon({
-                            color: isFocused ? (isBigButton ? '#FFFFFF' : theme.colors.primary) : '#9CA3AF',
+                            color: isFocused && !isBigButton ? theme.colors.primary : (isBigButton ? '#FFFFFF' : '#9CA3AF'),
                             size: isBigButton ? 32 : 24,
                             focused: isFocused,
                         })}
@@ -154,7 +236,7 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName }) =
                             <RNText style={styles.badgeText}>{cartCount}</RNText>
                         </View>
                     )}
-                </View>
+                </Animated.View>
                 {isFocused && !isBigButton && <Animated.View style={styles.activeDot} />}
             </Animated.View>
         </TouchableOpacity>
@@ -172,8 +254,8 @@ const styles = StyleSheet.create({
             ios: {
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.15,      // Increased opacity for visibility
-                shadowRadius: 24,         // Larger radius for "float"
+                shadowOpacity: 0.15,
+                shadowRadius: 24,
             },
             android: {
                 elevation: 12,
@@ -204,7 +286,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    // BIG CART BUTTON
     bigIconContainer: {
         width: 60,
         height: 60,
@@ -212,8 +293,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.primary,
         marginTop: -45,
         borderWidth: 4,
-        borderColor: '#FFFFFF', // White border to match tab bar
-        // Enhanced layered shadow
+        borderColor: '#FFFFFF',
         shadowColor: theme.colors.primary,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.4,
@@ -221,14 +301,8 @@ const styles = StyleSheet.create({
         elevation: 12,
     },
     activeIconContainer: {
-        backgroundColor: '#F3F4F6', // Light gray background for active
+        backgroundColor: '#F3F4F6',
         borderRadius: 20,
-    },
-    activeBigIconContainer: {
-        transform: [{ scale: 1.05 }],
-        shadowOpacity: 0.6,
-        shadowRadius: 20,
-        elevation: 15,
     },
     activeDot: {
         position: 'absolute',
@@ -242,7 +316,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -4,
         right: -4,
-        backgroundColor: '#FF3B30', // Modern iOS-style red
+        backgroundColor: '#FF3B30',
         minWidth: 18,
         height: 18,
         borderRadius: 9,
@@ -257,5 +331,38 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: 'bold',
         textAlign: 'center',
-    }
+    },
+    // ---- MODAL & MENU ----
+    modalBackdrop: {
+        flex: 1,
+    },
+    backdropTint: {
+        backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    menuContainer: {
+        position: 'absolute',
+        bottom: 55,
+        left: width / 2,
+    },
+    menuItem: {
+        position: 'absolute',
+        left: -28,
+        top: -28,
+    },
+    menuButton: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: theme.colors.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.30,
+        shadowRadius: 4.65,
+        elevation: 8,
+    },
 });

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../utils/theme';
+import { useNavigation } from '@react-navigation/native';
 import { Mic, Camera, Search, MessageCircle, MapPin, Zap, Brain, Sparkles } from 'lucide-react-native';
 
 const MOOD_OPTIONS = [
@@ -14,6 +15,7 @@ const MOOD_OPTIONS = [
 ];
 
 export const AIHubScreen = () => {
+    const navigation = useNavigation();
     const [selectedMood, setSelectedMood] = useState(null);
 
     const handleMoodSelection = (mood) => {
@@ -157,7 +159,7 @@ export const AIHubScreen = () => {
             </ScrollView>
 
             {/* Chat Assistant Floating Button */}
-            <TouchableOpacity style={styles.fab}>
+            <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('AIChat')}>
                 <MessageCircle size={28} color="#fff" />
             </TouchableOpacity>
         </SafeAreaView>

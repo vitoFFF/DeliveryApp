@@ -7,6 +7,7 @@ import { LoginScreen } from '../screens/LoginScreen';
 import { AdminNavigator } from './AdminNavigator';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { MainNavigator } from './MainNavigator';
+import SupportScreen from '../screens/SupportScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrderStatusScreen } from '../screens/OrderStatusScreen';
 import { checkAuth } from '../store/authSlice';
@@ -67,6 +68,11 @@ export const AppNavigator = () => {
                             name="OrderStatus"
                             component={OrderStatusScreen}
                             options={{ title: 'Order Status', headerLeft: null }}
+                        />
+                        <Stack.Screen
+                            name="Support"
+                            component={SupportScreen}
+                            options={{ title: 'Support' }}
                         />
                     </>
                 )}

@@ -3,9 +3,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, User } from 'lucide-react-native';
 import { Text, Image } from 'react-native';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { AIHubScreen } from '../screens/AIHubScreen';
-import { FavouriteScreen } from '../screens/FavouriteScreen';
+import FavouriteScreen from '../screens/FavouriteScreen';
 import { CartScreen } from '../screens/CartScreen';
+import { AINavigator } from './AINavigator';
 import { HomeNavigator } from './HomeNavigator';
 import { CustomTabBar } from '../components/CustomTabBar';
 import { theme } from '../utils/theme';
@@ -52,7 +52,7 @@ export const MainNavigator = () => {
             />
             <Tab.Screen
                 name="AIHub"
-                component={AIHubScreen}
+                component={AINavigator}
                 options={{
                     tabBarLabel: 'AI Hub',
                     isBigButton: true, // Custom prop for big middle button
