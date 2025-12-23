@@ -5,6 +5,7 @@ import { Send, Sparkles, Settings, Plus, X, Check, ScanLine } from 'lucide-react
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useSelector } from 'react-redux';
 
 // REPLACE WITH YOUR ACTUAL KEY
 const API_KEY = "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";
@@ -12,6 +13,7 @@ const API_KEY = "sk-or-v1-99bea34f8f1e7ce49ed9c1d08d7a8e6f7ba79f5762f77bd4127dd8
 const AIChatScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const flatListRef = useRef(null);
+  const user = useSelector((state) => state.auth.user);
 
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false });
@@ -32,8 +34,13 @@ const AIChatScreen = ({ navigation }) => {
     { id: 'meta-llama/llama-3.1-405b-instruct:free', name: 'Llama 3.1 405B' },
   ];
 
+  const getWelcomeMessage = () => {
+    const userName = user?.displayName || '';
+    return `Hello${userName ? ' ' + userName : ''}! I'm your AI Assistant. How can I help you today?`;
+  };
+
   const [messages, setMessages] = useState([
-    { id: '1', text: "Hello! I'm your AI Assistant. How can I help you today?", sender: 'ai' }
+    { id: '1', text: getWelcomeMessage(), sender: 'ai' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +49,7 @@ const AIChatScreen = ({ navigation }) => {
 
   const startNewChat = () => {
     setMessages([
-      { id: Date.now().toString(), text: "Hello! I'm your AI Assistant. How can I help you today?", sender: 'ai' }
+      { id: Date.now().toString(), text: getWelcomeMessage(), sender: 'ai' }
     ]);
   };
 
