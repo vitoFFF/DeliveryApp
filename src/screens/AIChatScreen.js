@@ -63,11 +63,18 @@ const AIChatScreen = ({ navigation }) => {
   const [selectedProvider, setSelectedProvider] = useState('Groq');
   const [selectedModel, setSelectedModel] = useState(PROVIDERS.Groq.models[0].id);
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+  const [showChips, setShowChips] = useState(true);
 
   const startNewChat = () => {
     setMessages([
       { id: Date.now().toString(), text: getWelcomeMessage(), sender: 'ai' }
     ]);
+    setShowChips(true);
+  };
+
+  const handleChipPress = (text) => {
+    setInput(text);
+    sendMessage();
   };
 
   const sendMessage = async () => {
@@ -82,6 +89,7 @@ const AIChatScreen = ({ navigation }) => {
     const userMessage = { id: Date.now().toString(), text: input, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setShowChips(false);
     setIsLoading(true);
 
     const provider = PROVIDERS[selectedProvider];
@@ -149,32 +157,51 @@ const AIChatScreen = ({ navigation }) => {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
-  const renderMessage = ({ item }) => {
+  const renderMessage = ({ item, index }) => {
     const isUser = item.sender === 'user';
+    const isFirstAIMessage = !isUser && index === 0;
     return (
-      <View style={[styles.messageWrapper, isUser ? styles.userMessageWrapper : styles.aiMessageWrapper]}>
-        {!isUser && (
-          <View style={styles.avatarContainer}>
-            <LinearGradient
-              colors={['#4facfe', '#00f2fe']}
-              style={styles.avatarGradient}
-            >
-              <Sparkles size={16} color="#fff" />
-            </LinearGradient>
+      <View>
+        <View style={[styles.messageWrapper, isUser ? styles.userMessageWrapper : styles.aiMessageWrapper]}>
+          {!isUser && (
+            <View style={styles.avatarContainer}>
+              <LinearGradient
+                colors={['#4facfe', '#00f2fe']}
+                style={styles.avatarGradient}
+              >
+                <Sparkles size={16} color="#fff" />
+              </LinearGradient>
+            </View>
+          )}
+          <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
+            {isUser && (
+              <LinearGradient
+                colors={['#007AFF', '#00C6FF']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFillObject}
+              />
+            )}
+            <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.aiMessageText]}>
+              {item.text}
+            </Text>
+          </View>
+        </View>
+        {isFirstAIMessage && showChips && (
+          <View style={styles.chipsContainer}>
+            {['Where is my order?', 'Change delivery address', 'I cut my finger'].map((text, chipIndex) => (
+              <TouchableOpacity key={chipIndex} onPress={() => handleChipPress(text)}>
+                <LinearGradient
+                  colors={['#f8f9fa', '#e9ecef']}
+                  style={styles.chip}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={styles.chipText}>{text}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
-        <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
-          {isUser && (
-            <LinearGradient
-              colors={['#007AFF', '#00C6FF']}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
-            />
-          )}
-          <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.aiMessageText]}>
-            {item.text}
-          </Text>
-        </View>
       </View>
     );
   };
@@ -543,6 +570,30 @@ const styles = StyleSheet.create({
   },
   selectedProviderButtonText: {
     color: '#fff',
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e1e4e8',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  chipText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '500',
   }
 });
 
