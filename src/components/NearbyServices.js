@@ -12,37 +12,57 @@ const { width } = Dimensions.get('window');
 // Mock center (Tsodoreti)
 const USER_LOCATION = { latitude: 41.7610, longitude: 44.6606 };
 
-const SERVICE_TYPES = [
-    { type: 'Restaurant', icon: Utensils, color: '#FF5252' },
-    { type: 'Bakery', icon: Store, color: '#FFB74D' },
-    { type: 'Pharmacy', icon: PlusSquare, color: '#4CAF50' },
+const SPECIFIC_LOCATIONS = [
+    {
+        id: 'art-nona',
+        name: 'Art Nona',
+        latitude: 41.921495013939094,
+        longitude: 42.00402876754617,
+        type: 'Restaurant',
+        icon: Utensils,
+        color: '#FF5252'
+    },
+    {
+        id: 'my-market',
+        name: 'My Market',
+        latitude: 41.92293970858616,
+        longitude: 41.9997383322704,
+        type: 'Store',
+        icon: Store,
+        color: '#FFB74D'
+    },
+    {
+        id: 'pirosmani',
+        name: 'Pirosmani',
+        latitude: 41.92767949773373,
+        longitude: 42.00949770721634,
+        type: 'Restaurant',
+        icon: Utensils,
+        color: '#FF5252'
+    }
 ];
 
-const generateRandomServices = (count) => {
-    return Array.from({ length: count }).map((_, i) => {
-        const serviceType = SERVICE_TYPES[i % SERVICE_TYPES.length];
-        return {
-            id: `service-${i}`,
-            latitude: USER_LOCATION.latitude + (Math.random() - 0.5) * 0.015,
-            longitude: USER_LOCATION.longitude + (Math.random() - 0.5) * 0.015,
-            name: `${serviceType.type} ${i + 1}`,
-            type: serviceType.type,
-            icon: serviceType.icon,
-            color: serviceType.color,
-        };
-    });
-};
-
 export const NearbyServices = ({ style }) => {
-    const [services, setServices] = useState(generateRandomServices(6));
+    const [location, setLocation] = useState(null);
+    const [services, setServices] = useState(SPECIFIC_LOCATIONS);
     const [tracksViewChanges, setTracksViewChanges] = useState(true);
 
     useEffect(() => {
         (async () => {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                console.warn('Permission to access location was denied');
+            let center = USER_LOCATION;
+            try {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status === 'granted') {
+                    const loc = await Location.getCurrentPositionAsync({});
+                    center = {
+                        latitude: loc.coords.latitude,
+                        longitude: loc.coords.longitude,
+                    };
+                }
+            } catch (error) {
+                console.log('Error fetching location:', error);
             }
+            setLocation(center);
         })();
 
         // Fix flickering by disabling tracksViewChanges after initial render
@@ -62,10 +82,11 @@ export const NearbyServices = ({ style }) => {
                 </View>
             </View>
             <View style={styles.mapContainer}>
+                {location && (
                 <MapView
                     style={styles.map}
                     initialRegion={{
-                        ...USER_LOCATION,
+                        ...location,
                         latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
                     }}
@@ -95,6 +116,7 @@ export const NearbyServices = ({ style }) => {
                         );
                     })}
                 </MapView>
+                )}
             </View>
         </View>
     );
