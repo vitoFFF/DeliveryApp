@@ -201,6 +201,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 8,
         elevation: 2,
+        borderBottomLeftRadius: 16,
+        borderBottomRightRadius: 16,
+        overflow: 'hidden',
     },
     gradient: {
         paddingTop: 8,

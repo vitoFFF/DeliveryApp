@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Animated } from 'react-native';
-import { Search, X, SlidersHorizontal } from 'lucide-react-native';
+import { Search, X, SlidersHorizontal, Camera } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../utils/theme';
 
@@ -8,7 +8,8 @@ export const SearchBar = ({
     value,
     onChangeText,
     placeholder,
-    onFilterPress
+    onFilterPress,
+    onImageSearchPress
 }) => {
     const { t } = useTranslation();
     const [isFocused, setIsFocused] = React.useState(false);
@@ -56,6 +57,24 @@ export const SearchBar = ({
                 onBlur={() => setIsFocused(false)}
                 selectionColor={theme.colors.primary}
             />
+
+            <TouchableOpacity
+                onPress={onImageSearchPress}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                style={styles.imageSearchButton}
+                activeOpacity={1}
+            >
+                <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                    <View style={styles.imageSearchChip}>
+                        <Camera
+                            size={18}
+                            color={theme.colors.primary}
+                            strokeWidth={2.5}
+                        />
+                    </View>
+                </Animated.View>
+            </TouchableOpacity>
 
             <TouchableOpacity
                 onPress={onFilterPress}
@@ -143,9 +162,25 @@ const styles = StyleSheet.create({
         letterSpacing: 0.3,
         height: '100%', // Ensure full height hit area
     },
+    imageSearchButton: {
+        position: 'relative',
+        marginLeft: 2,
+        marginRight: -6,
+        padding: 4,
+    },
+    imageSearchChip: {
+        width: 36, // Reduced from 44
+        height: 36, // Reduced from 44
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 10, // Slightly smaller radius to match smaller size
+        backgroundColor: '#FFF0ED',
+        borderWidth: 1.5,
+        borderColor: '#FFD1C7',
+    },
     filterButton: {
         position: 'relative',
-        marginLeft: 4,
+        marginLeft: -6,
         padding: 4,
     },
     filterChip: {

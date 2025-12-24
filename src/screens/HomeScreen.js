@@ -163,6 +163,7 @@ export const HomeScreen = ({ navigation }) => {
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         onFilterPress={() => setShowFilterModal(true)}
+                        onImageSearchPress={() => {}}
                     />
                     <View style={{ paddingHorizontal: 16 }}>
                         {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
@@ -200,6 +201,7 @@ export const HomeScreen = ({ navigation }) => {
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                             onFilterPress={() => setShowFilterModal(true)}
+                            onImageSearchPress={() => {}}
                         />
                         <FilterChips
                             filters={filters}
@@ -288,6 +290,9 @@ const styles = StyleSheet.create({
     fixedHeader: {
         backgroundColor: theme.colors.background,
         zIndex: 100,
+        borderBottomLeftRadius: theme.borderRadius.l,
+        borderBottomRightRadius: theme.borderRadius.l,
+        overflow: 'hidden',
     },
     stickyPart: {
         paddingBottom: 8,

@@ -5,10 +5,11 @@ import Svg, { Path } from 'react-native-svg';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, interpolate, Extrapolate, Easing } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { selectCartCount } from '../store/cartSlice';
 import { theme } from '../utils/theme';
 import { Text as RNText } from 'react-native';
-import { Home, MessageSquare, LifeBuoy } from 'lucide-react-native';
+import { Home, MessageSquare, LifeBuoy, Sparkles } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -91,7 +92,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
 
     const menuItems = [
         { icon: <Home color="white" size={24} />, screen: 'AIHub', label: 'AI Hub' },
-        { icon: <Image source={require('../../assets/robot.png')} style={{ width: 38, height: 38 }} resizeMode="contain" />, screen: 'AIChat', label: 'AI Chat' },
+        { icon: <Sparkles color="white" size={24} />, screen: 'AIChat', label: 'AI Chat' },
         { icon: <LifeBuoy color="white" size={24} />, screen: 'Support', label: 'Support' },
     ];
 
@@ -129,9 +130,22 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
                         });
                         return (
                             <Animated.View key={item.screen} style={[styles.menuItem, animatedStyle]}>
-                                <TouchableOpacity style={styles.menuButton} onPress={() => navigateAndClose(item.screen)}>
-                                    {item.icon}
-                                </TouchableOpacity>
+                                {item.screen === 'AIChat' ? (
+                                    <TouchableOpacity onPress={() => navigateAndClose(item.screen)}>
+                                        <LinearGradient
+                                            colors={['#667eea', '#764ba2']}
+                                            style={styles.aiChatMenuButton}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 1 }}
+                                        >
+                                            {item.icon}
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity style={styles.menuButton} onPress={() => navigateAndClose(item.screen)}>
+                                        {item.icon}
+                                    </TouchableOpacity>
+                                )}
                             </Animated.View>
                         );
                     })}
@@ -354,6 +368,21 @@ const styles = StyleSheet.create({
         height: 56,
         borderRadius: 28,
         backgroundColor: theme.colors.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.30,
+        shadowRadius: 4.65,
+        elevation: 8,
+    },
+    aiChatMenuButton: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: "#000",
