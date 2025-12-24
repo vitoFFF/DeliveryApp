@@ -64,6 +64,8 @@ const AIChatScreen = ({ navigation }) => {
   const [selectedModel, setSelectedModel] = useState(PROVIDERS.Groq.models[0].id);
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [showChips, setShowChips] = useState(true);
+  const [streamingMessageId, setStreamingMessageId] = useState(null);
+  const typingInterval = useRef(null);
 
   const startNewChat = () => {
     setMessages([
@@ -76,6 +78,36 @@ const AIChatScreen = ({ navigation }) => {
     setInput(text);
     sendMessage();
   };
+
+  const animateText = (fullText, messageId) => {
+    let currentText = '';
+    let index = 0;
+    // Constant writing speed: ~20ms per character
+    const delay = 25;
+
+    if (typingInterval.current) clearInterval(typingInterval.current);
+
+    typingInterval.current = setInterval(() => {
+      if (index < fullText.length) {
+        currentText += fullText.charAt(index);
+        index++;
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, text: currentText }
+            : msg
+        ));
+      } else {
+        clearInterval(typingInterval.current);
+        typingInterval.current = null;
+      }
+    }, delay);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (typingInterval.current) clearInterval(typingInterval.current);
+    };
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -138,11 +170,12 @@ const AIChatScreen = ({ navigation }) => {
 
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        text: aiText,
+        text: "",
         sender: 'ai'
       };
 
       setMessages(prev => [...prev, aiMessage]);
+      animateText(aiText, aiMessage.id);
 
     } catch (error) {
       console.error("AI Request Failed:", error);
@@ -416,8 +449,14 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 4,
   },
   aiBubble: {
-    backgroundColor: '#f2f2f7',
+    backgroundColor: '#F8FAFC',
     borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: '#924decff',
+    shadowColor: '#64748B',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   messageText: {
     fontSize: 16,
@@ -427,7 +466,9 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   aiMessageText: {
-    color: '#333',
+    color: '#0F172A',
+    fontWeight: '500',
+    lineHeight: 24,
   },
   inputWrapper: {
     // padding is added dynamically via style prop
