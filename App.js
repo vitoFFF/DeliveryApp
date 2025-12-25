@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { store } from './src/store';
 import { theme } from './src/utils/theme';
-import { AppNavigator } from './src/navigation/AppNavigator';
+import AppNavigator from './src/navigation/AppNavigator';
 import { StatusBar } from 'expo-status-bar';
 
 export default function App() {

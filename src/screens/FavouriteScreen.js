@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../utils/theme';
 
-const FavouriteScreen = () => {
+export const FavouriteScreen = () => {
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.content}>

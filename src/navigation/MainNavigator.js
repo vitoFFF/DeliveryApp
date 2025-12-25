@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Home, User } from 'lucide-react-native';
 import { Text, Image } from 'react-native';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import FavouriteScreen from '../screens/FavouriteScreen';
+import { FavouriteScreen } from '../screens/FavouriteScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { AINavigator } from './AINavigator';
 import { HomeNavigator } from './HomeNavigator';
@@ -22,7 +22,7 @@ export const MainNavigator = () => {
                     if (route.name === 'HomeTab') {
                         return <Home size={size} color={color} />;
                     } else if (route.name === 'Favourites') {
-                        return <Image source={require('../../assets/favorite.png')} style={{ width: 30, height: 30 | "" }} />;
+                        return <Image source={require('../../assets/favorite.png')} style={{ width: 30, height: 30 }} />;
 
                         // return <Text style={{ fontSize: size }}>💔</Text>;
                     } else if (route.name === 'AIHub') {

@@ -1,5 +1,5 @@
 -- Create Categories Table
-CREATE TABLE public.categories (
+CREATE TABLE IF NOT EXISTS public.categories (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     icon TEXT,
@@ -8,7 +8,7 @@ CREATE TABLE public.categories (
 );
 
 -- Create Venues Table
-CREATE TABLE public.venues (
+CREATE TABLE IF NOT EXISTS public.venues (
     id TEXT PRIMARY KEY,
     category_id TEXT REFERENCES public.categories(id),
     name TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE public.venues (
 );
 
 -- Create Products Table
-CREATE TABLE public.products (
+CREATE TABLE IF NOT EXISTS public.products (
     id TEXT PRIMARY KEY,
     restaurant_id TEXT REFERENCES public.venues(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
@@ -33,68 +33,40 @@ CREATE TABLE public.products (
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE public.venues ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
--- Create Policies (Allow Public Read, Authenticated Write)
+-- Drop existing policies
+DROP POLICY IF EXISTS "Public categories are viewable by everyone" ON public.categories;
+DROP POLICY IF EXISTS "Users can insert categories" ON public.categories;
+DROP POLICY IF EXISTS "Users can update categories" ON public.categories;
+DROP POLICY IF EXISTS "Users can delete categories" ON public.categories;
+
+DROP POLICY IF EXISTS "Public venues are viewable by everyone" ON public.venues;
+DROP POLICY IF EXISTS "Users can insert venues" ON public.venues;
+DROP POLICY IF EXISTS "Users can update venues" ON public.venues;
+DROP POLICY IF EXISTS "Users can delete venues" ON public.venues;
+
+DROP POLICY IF EXISTS "Public products are viewable by everyone" ON public.products;
+DROP POLICY IF EXISTS "Users can insert products" ON public.products;
+DROP POLICY IF EXISTS "Users can update products" ON public.products;
+DROP POLICY IF EXISTS "Users can delete products" ON public.products;
+
+-- Create new policies
 -- Categories
-CREATE POLICY "Public categories are viewable by everyone" ON public.categories FOR
-SELECT USING (true);
-
-CREATE POLICY "Users can insert categories" ON public.categories FOR
-INSERT
-WITH
-    CHECK (
-        auth.role () = 'authenticated'
-    );
-
-CREATE POLICY "Users can update categories" ON public.categories FOR
-UPDATE USING (
-    auth.role () = 'authenticated'
-);
-
-CREATE POLICY "Users can delete categories" ON public.categories FOR DELETE USING (
-    auth.role () = 'authenticated'
-);
+CREATE POLICY "Public categories are viewable by everyone" ON public.categories FOR SELECT USING (true);
+CREATE POLICY "Admins can manage categories" ON public.categories FOR ALL
+    USING ((SELECT public.is_user_in_role(auth.uid(), 'admin')))
+    WITH CHECK ((SELECT public.is_user_in_role(auth.uid(), 'admin')));
 
 -- Venues
-CREATE POLICY "Public venues are viewable by everyone" ON public.venues FOR
-SELECT USING (true);
-
-CREATE POLICY "Users can insert venues" ON public.venues FOR
-INSERT
-WITH
-    CHECK (
-        auth.role () = 'authenticated'
-    );
-
-CREATE POLICY "Users can update venues" ON public.venues FOR
-UPDATE USING (
-    auth.role () = 'authenticated'
-);
-
-CREATE POLICY "Users can delete venues" ON public.venues FOR DELETE USING (
-    auth.role () = 'authenticated'
-);
+CREATE POLICY "Public venues are viewable by everyone" ON public.venues FOR SELECT USING (true);
+CREATE POLICY "Admins can manage venues" ON public.venues FOR ALL
+    USING ((SELECT public.is_user_in_role(auth.uid(), 'admin')))
+    WITH CHECK ((SELECT public.is_user_in_role(auth.uid(), 'admin')));
 
 -- Products
-CREATE POLICY "Public products are viewable by everyone" ON public.products FOR
-SELECT USING (true);
-
-CREATE POLICY "Users can insert products" ON public.products FOR
-INSERT
-WITH
-    CHECK (
-        auth.role () = 'authenticated'
-    );
-
-CREATE POLICY "Users can update products" ON public.products FOR
-UPDATE USING (
-    auth.role () = 'authenticated'
-);
-
-CREATE POLICY "Users can delete products" ON public.products FOR DELETE USING (
-    auth.role () = 'authenticated'
-);
+CREATE POLICY "Public products are viewable by everyone" ON public.products FOR SELECT USING (true);
+CREATE POLICY "Admins can manage products" ON public.products FOR ALL
+    USING ((SELECT public.is_user_in_role(auth.uid(), 'admin')))
+    WITH CHECK ((SELECT public.is_user_in_role(auth.uid(), 'admin')));

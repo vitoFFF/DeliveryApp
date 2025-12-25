@@ -4,9 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSelector, useDispatch } from 'react-redux';
 import { Text, View } from 'react-native';
 import { LoginScreen } from '../screens/LoginScreen';
-import { AdminNavigator } from './AdminNavigator';
 import { RegisterScreen } from '../screens/RegisterScreen';
+import { AdminNavigator } from './AdminNavigator';
 import { MainNavigator } from './MainNavigator';
+import DriverNavigator from './DriverNavigator';
 import SupportScreen from '../screens/SupportScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrderStatusScreen } from '../screens/OrderStatusScreen';
@@ -14,8 +15,8 @@ import { checkAuth } from '../store/authSlice';
 
 const Stack = createNativeStackNavigator();
 
-export const AppNavigator = () => {
-    const { isAuthenticated, isLoading, isAdmin } = useSelector((state) => state.auth);
+const AppNavigator = () => {
+    const { isAuthenticated, isLoading, role } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -30,29 +31,26 @@ export const AppNavigator = () => {
         );
     }
 
-    return (
-        <NavigationContainer>
-            <Stack.Navigator>
-                {!isAuthenticated ? (
-                    <>
-                        <Stack.Screen
-                            name="Login"
-                            component={LoginScreen}
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="Register"
-                            component={RegisterScreen}
-                            options={{ headerShown: false }}
-                        />
-                    </>
-                ) : isAdmin ? (
+    const renderNavigator = () => {
+        switch (role) {
+            case 'admin':
+                return (
                     <Stack.Screen
                         name="AdminPanel"
                         component={AdminNavigator}
                         options={{ headerShown: false }}
                     />
-                ) : (
+                );
+            case 'driver':
+                return (
+                    <Stack.Screen
+                        name="DriverPanel"
+                        component={DriverNavigator}
+                        options={{ headerShown: false }}
+                    />
+                );
+            default:
+                return (
                     <>
                         <Stack.Screen
                             name="Main"
@@ -75,8 +73,32 @@ export const AppNavigator = () => {
                             options={{ title: 'Support' }}
                         />
                     </>
+                );
+        }
+    };
+
+    return (
+        <NavigationContainer>
+            <Stack.Navigator>
+                {!isAuthenticated ? (
+                    <>
+                        <Stack.Screen
+                            name="Login"
+                            component={LoginScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="Register"
+                            component={RegisterScreen}
+                            options={{ headerShown: false }}
+                        />
+                    </>
+                ) : (
+                    renderNavigator()
                 )}
             </Stack.Navigator>
-        </NavigationContainer >
+        </NavigationContainer>
     );
 };
+
+export default AppNavigator;

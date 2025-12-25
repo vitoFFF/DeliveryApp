@@ -3,17 +3,6 @@ import { storage } from '../utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../config/supabaseConfig';
 
-// Helper to check admin status
-const isUserAdmin = (email) => {
-    if (!email) return false;
-    const normalizedEmail = email.toLowerCase();
-    return [
-        'vitokvachadze@gmail.com',
-        'admin@deliveryapp.com',
-        'boss@gmail.com'
-    ].includes(normalizedEmail);
-};
-
 export const loginUser = createAsyncThunk(
     'auth/login',
     async ({ email, password }, { rejectWithValue }) => {
@@ -26,10 +15,27 @@ export const loginUser = createAsyncThunk(
             if (error) throw error;
 
             const user = data.user;
-            // Persist token manually to maintain compatibility with existing logic
+
+            // Fetch user role from public.users table
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user.id);
+
+            if (userError) {
+                console.error('Error fetching user role:', userError);
+            }
+
+            const role = (userData && userData.length > 0) ? userData[0].role : 'user';
+
             await storage.setItemAsync('userToken', data.session.access_token);
 
-            const userObj = { uid: user.id, email: user.email, displayName: user.user_metadata?.full_name || user.email };
+            const userObj = {
+                uid: user.id,
+                email: user.email,
+                displayName: user.user_metadata?.full_name || user.email,
+                role: role
+            };
             await AsyncStorage.setItem('user', JSON.stringify(userObj));
             return userObj;
         } catch (error) {
@@ -53,21 +59,26 @@ export const registerUser = createAsyncThunk(
             });
 
             if (error) throw error;
-
             const user = data.user;
 
-            // If email confirmation is enabled, session might be null immediately
             if (data.session) {
                 await storage.setItemAsync('userToken', data.session.access_token);
             }
 
-            // Return a serializable user object
-            return { uid: user.id, email: user.email, displayName: name };
+            // Note: User profile should be created by database trigger
+            // If trigger fails, the profile might not exist, but auth succeeded
+
+            return { uid: user.id, email: user.email, displayName: name, role: 'user' };
         } catch (error) {
+            // Handle user already exists error
+            if (error.message.includes('already exists') || error.message.includes('User already registered')) {
+                return rejectWithValue('User with this email already exists.');
+            }
             return rejectWithValue(error.message);
         }
     }
 );
+
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
     await supabase.auth.signOut();
@@ -76,27 +87,37 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
 });
 
 export const checkAuth = createAsyncThunk('auth/check', async () => {
-    // Check Supabase session first
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session && session.user) {
-        // Refresh our local storage to match valid session
         await storage.setItemAsync('userToken', session.access_token);
+        
+        // Fetch user role from public.users table
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', session.user.id);
+        
+        if (userError) {
+             console.error('Error fetching user role:', userError);
+        }
+
+        const role = (userData && userData.length > 0) ? userData[0].role : 'user';
+
         const userObj = {
             uid: session.user.id,
             email: session.user.email,
-            displayName: session.user.user_metadata?.full_name
+            displayName: session.user.user_metadata?.full_name,
+            role: role
         };
         await AsyncStorage.setItem('user', JSON.stringify(userObj));
         return { isAuthenticated: true, user: userObj };
     }
 
-    // Fallback to local storage check if network fails or session missing but token exists (rare with Supabase)
     const token = await storage.getItemAsync('userToken');
     const userStr = await AsyncStorage.getItem('user');
 
     if (token && userStr) {
-        // We could verify the token here with supabase.auth.getUser(token) but start with simple check
         const user = JSON.parse(userStr);
         return { isAuthenticated: true, user };
     }
@@ -109,14 +130,13 @@ const authSlice = createSlice({
     initialState: {
         user: null,
         isAuthenticated: false,
-        isAdmin: false,
+        role: null,
         isLoading: false,
         error: null,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // Login
             .addCase(loginUser.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -125,13 +145,12 @@ const authSlice = createSlice({
                 state.isLoading = false;
                 state.isAuthenticated = true;
                 state.user = action.payload;
-                state.isAdmin = isUserAdmin(action.payload.email);
+                state.role = action.payload.role;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             })
-            // Register
             .addCase(registerUser.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
@@ -140,24 +159,25 @@ const authSlice = createSlice({
                 state.isLoading = false;
                 state.isAuthenticated = true;
                 state.user = action.payload;
-                state.isAdmin = isUserAdmin(action.payload.email);
+                state.role = action.payload.role;
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
             })
-            // Logout
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;
                 state.isAuthenticated = false;
-                state.isAdmin = false;
+                state.role = null;
             })
-            // Check Auth
             .addCase(checkAuth.fulfilled, (state, action) => {
                 state.isAuthenticated = action.payload.isAuthenticated;
                 if (action.payload.isAuthenticated && action.payload.user) {
                     state.user = action.payload.user;
-                    state.isAdmin = isUserAdmin(action.payload.user.email);
+                    state.role = action.payload.user.role;
+                } else {
+                    state.user = null;
+                    state.role = null;
                 }
             });
     },

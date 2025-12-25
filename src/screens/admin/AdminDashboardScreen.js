@@ -16,7 +16,7 @@ export const AdminDashboardScreen = ({ navigation }) => {
         { title: 'Venues', subtitle: 'Restaurants & Shops', icon: 'store', route: 'AdminVenues', color: '#f093fb', gradient: ['#f093fb', '#f5576c'] },
         { title: 'Products', subtitle: 'Menu Items', icon: 'food', route: 'AdminProducts', color: '#667eea', gradient: ['#667eea', '#764ba2'] },
         // Add more placeholders for future
-        { title: 'Drivers', subtitle: 'Manage Fleet', icon: 'bike', route: null, color: '#fbc2eb', gradient: ['#fbc2eb', '#a6c1ee'] },
+        { title: 'Drivers', subtitle: 'Manage Drivers', icon: 'bike', route: 'AdminDrivers', color: '#fbc2eb', gradient: ['#fbc2eb', '#a6c1ee'] },
     ];
 
     const handleLogout = () => {
