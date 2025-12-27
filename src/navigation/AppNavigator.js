@@ -11,17 +11,12 @@ import DriverNavigator from './DriverNavigator';
 import SupportScreen from '../screens/SupportScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrderStatusScreen } from '../screens/OrderStatusScreen';
-import { checkAuth } from '../store/authSlice';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
     const { isAuthenticated, isLoading, role } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(checkAuth());
-    }, [dispatch]);
 
     if (isLoading) {
         return (

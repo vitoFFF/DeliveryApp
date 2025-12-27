@@ -7,14 +7,14 @@
     "slug": "DeliveryApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/xxxhdpi.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/splash-icon.png",
     "splash": {
       "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "plugins": [
       "expo-localization",
       "expo-secure-store",
@@ -23,7 +23,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow DeliveryApp to use your location."
         }
-      ]
+      ],
+      "expo-splash-screen"
     ],
     "ios": {
       "supportsTablet": true,
@@ -33,7 +34,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/xxxhdpi.png",
+        "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -48,6 +49,11 @@
         "googleMaps": {
           "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
         }
+      },
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#ffffff"
       }
     },
     "extra": {
