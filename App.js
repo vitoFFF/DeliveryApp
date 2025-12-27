@@ -19,6 +19,7 @@ export default function App() {
     async function prepare() {
       try {
         // Essential preparation logic (auth check, etc.)
+        await store.dispatch(checkAuth());
         await new Promise(resolve => setTimeout(resolve, 500));
       } catch (e) {
         console.warn(e);
