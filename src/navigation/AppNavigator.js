@@ -5,20 +5,27 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Text, View } from 'react-native';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
+import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { AdminNavigator } from './AdminNavigator';
 import { MainNavigator } from './MainNavigator';
 import DriverNavigator from './DriverNavigator';
 import SupportScreen from '../screens/SupportScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrderStatusScreen } from '../screens/OrderStatusScreen';
+import { checkOnboarding } from '../store/appSlice';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
     const { isAuthenticated, isLoading, role } = useSelector((state) => state.auth);
+    const { hasSeenOnboarding, isOnboardingLoading } = useSelector((state) => state.app);
     const dispatch = useDispatch();
 
-    if (isLoading) {
+    useEffect(() => {
+        dispatch(checkOnboarding());
+    }, [dispatch]);
+
+    if (isLoading || isOnboardingLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <Text>Loading...</Text>
@@ -74,8 +81,14 @@ const AppNavigator = () => {
 
     return (
         <NavigationContainer>
-            <Stack.Navigator>
-                {!isAuthenticated ? (
+            <Stack.Navigator screenOptions={{ animation: 'fade' }}>
+                {!hasSeenOnboarding ? (
+                    <Stack.Screen
+                        name="Onboarding"
+                        component={OnboardingScreen}
+                        options={{ headerShown: false }}
+                    />
+                ) : !isAuthenticated ? (
                     <>
                         <Stack.Screen
                             name="Login"

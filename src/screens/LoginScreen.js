@@ -11,8 +11,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export const LoginScreen = ({ navigation }) => {
     const { t } = useTranslation();
-    const [email, setEmail] = useState('user@example.com');
-    const [password, setPassword] = useState('password123');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const dispatch = useDispatch();
     const { isLoading, error } = useSelector((state) => state.auth);
