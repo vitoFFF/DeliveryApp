@@ -45,11 +45,7 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyAzd7H7osMun82EqK37UHjEn-dpX2JM2rI"
-        }
-      },
+      "config": {},
       "splash": {
         "image": "./assets/splash-icon.png",
         "resizeMode": "cover",

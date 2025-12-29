@@ -34,7 +34,9 @@
         "picked_for_you": "✨ Picked for You",
         "popular_now": "👇 Popular Now",
         "based_on_weather": "Based on Weather",
-        "collections": "Collections"
+        "collections": "Collections",
+        "services_near_you": "Services Near You",
+        "nearby_badge": "Nearby"
     },
     "cart": {
         "title": "Your Cart",
@@ -105,5 +107,47 @@
         "cart": "Cart",
         "profile": "Profile",
         "ai_chat": "AI Chat"
+    },
+    "ai_chat_screen": {
+        "header_title": "Delivery Chat",
+        "welcome_message": "Hello {{userName}}! I'm your AI Assistant. How can I help you today?",
+        "system_prompt": "You are a helpful, professional, and concise AI assistant integrated into a delivery application. Respond in a friendly application style.",
+        "chips": {
+            "order_status": "Where is my order?",
+            "change_address": "Change delivery address",
+            "cut_finger": "I cut my finger"
+        },
+        "input_placeholder": "Ask anything...",
+        "error_config": "Configuration Error",
+        "error_api_key": "Please replace the API_KEY placeholder in the code with your actual key.",
+        "error_generic": "Error",
+        "error_connection": "Sorry, I encountered an error connecting to the AI. Please check your internet connection.",
+        "settings_title": "AI Settings",
+        "provider_label": "Provider",
+        "model_label": "Model"
+    },
+    "header": {
+        "deliver_to": "Deliver to",
+        "locating": "Locating..."
+    },
+    "settings_panel": {
+        "title": "Settings",
+        "subtitle": "Manage your account and preferences",
+        "account_section": "Account",
+        "personal_info": "Personal Information",
+        "personal_info_sub": "Name, email, and phone number",
+        "payment_methods": "Payment Methods",
+        "payment_methods_sub": "Cards, wallets, and more",
+        "order_history": "Order History",
+        "order_history_sub": "Your past and current orders",
+        "preferences_section": "Preferences",
+        "realtime_theme": "Real-time Theme",
+        "realtime_theme_sub": "Adapts to local weather",
+        "notifications": "Notifications",
+        "notifications_sub": "Push, email, and SMS",
+        "privacy": "Privacy & Security",
+        "privacy_sub": "Password and data",
+        "sign_out": "Sign Out",
+        "version": "Version {{version}} (Build {{build}})"
     }
 }

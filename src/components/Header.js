@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, ScrollView } from 'react-native';
 import { MapPin, ChevronDown, Settings, X, CreditCard, History, User, Bell, Shield, ChevronRight, CloudSun, LogOut } from 'lucide-react-native';
 import { theme } from '../utils/theme';
@@ -9,6 +10,7 @@ import { Switch } from 'react-native';
 import LanguageSelector from './LanguageSelector';
 
 export const Header = () => {
+    const { t } = useTranslation();
     const [address, setAddress] = useState('Planet Earth, Milky Way 🚀');
     const [isLoading, setIsLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -67,11 +69,11 @@ export const Header = () => {
             >
                 <View style={styles.container}>
                     <View style={styles.locationContainer}>
-                        <Text style={styles.deliverToText}>Deliver to</Text>
+                        <Text style={styles.deliverToText}>{t('header.deliver_to')}</Text>
                         <TouchableOpacity style={styles.locationSelector}>
                             <MapPin size={16} color={theme.colors.primary} style={styles.icon} />
                             <Text style={styles.locationText} numberOfLines={1}>
-                                {isLoading ? 'Locating...' : address}
+                                {isLoading ? t('header.locating') : address}
                             </Text>
                             <ChevronDown size={14} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
@@ -102,9 +104,9 @@ export const Header = () => {
                             <View style={styles.modalHandle} />
 
                             <View style={styles.modalHeader}>
-                                <View>
-                                    <Text style={styles.modalTitle}>Settings</Text>
-                                    <Text style={styles.modalSubtitle}>Manage your account and preferences</Text>
+                                <View style={{ flex: 1, marginRight: 16 }}>
+                                    <Text style={styles.modalTitle}>{t('settings_panel.title')}</Text>
+                                    <Text style={styles.modalSubtitle}>{t('settings_panel.subtitle')}</Text>
                                 </View>
                                 <TouchableOpacity
                                     onPress={() => setIsMenuOpen(false)}
@@ -115,34 +117,34 @@ export const Header = () => {
                             </View>
 
                             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.menuScroll}>
-                                <Text style={styles.sectionTitle}>Account</Text>
+                                <Text style={styles.sectionTitle}>{t('settings_panel.account_section')}</Text>
                                 <View style={styles.section}>
                                     <MenuItem
                                         icon={User}
-                                        label="Personal Information"
-                                        subtitle="Name, email, and phone number"
+                                        label={t('settings_panel.personal_info')}
+                                        subtitle={t('settings_panel.personal_info_sub')}
                                     />
                                     <MenuItem
                                         icon={CreditCard}
-                                        label="Payment Methods"
-                                        subtitle="Cards, wallets, and more"
+                                        label={t('settings_panel.payment_methods')}
+                                        subtitle={t('settings_panel.payment_methods_sub')}
                                     />
                                     <MenuItem
                                         icon={History}
-                                        label="Order History"
-                                        subtitle="Your past and current orders"
+                                        label={t('settings_panel.order_history')}
+                                        subtitle={t('settings_panel.order_history_sub')}
                                     />
                                 </View>
 
-                                <Text style={styles.sectionTitle}>Preferences</Text>
+                                <Text style={styles.sectionTitle}>{t('settings_panel.preferences_section')}</Text>
                                 <View style={styles.section}>
                                     <View style={styles.menuItem}>
                                         <View style={styles.menuIconContainer}>
                                             <CloudSun size={18} color={theme.colors.primary} />
                                         </View>
                                         <View style={styles.menuTextContainer}>
-                                            <Text style={styles.menuLabel}>Real-time Theme</Text>
-                                            <Text style={styles.menuSubtitle}>Adapts to local weather</Text>
+                                            <Text style={styles.menuLabel}>{t('settings_panel.realtime_theme')}</Text>
+                                            <Text style={styles.menuSubtitle}>{t('settings_panel.realtime_theme_sub')}</Text>
                                         </View>
                                         <Switch
                                             value={isWeatherThemeEnabled}
@@ -154,23 +156,23 @@ export const Header = () => {
                                     <LanguageSelector />
                                     <MenuItem
                                         icon={Bell}
-                                        label="Notifications"
-                                        subtitle="Push, email, and SMS"
+                                        label={t('settings_panel.notifications')}
+                                        subtitle={t('settings_panel.notifications_sub')}
                                     />
                                     <MenuItem
                                         icon={Shield}
-                                        label="Privacy & Security"
-                                        subtitle="Password and data"
+                                        label={t('settings_panel.privacy')}
+                                        subtitle={t('settings_panel.privacy_sub')}
                                     />
                                 </View>
 
                                 <TouchableOpacity style={styles.signOutButton}>
                                     <LogOut size={18} color={theme.colors.error} />
-                                    <Text style={styles.signOutText}>Sign Out</Text>
+                                    <Text style={styles.signOutText}>{t('settings_panel.sign_out')}</Text>
                                 </TouchableOpacity>
 
                                 <View style={styles.footer}>
-                                    <Text style={styles.versionText}>Version 1.0.0 (Build 42)</Text>
+                                    <Text style={styles.versionText}>{t('settings_panel.version', { version: '1.0.0', build: '42' })}</Text>
                                 </View>
                             </ScrollView>
                         </View>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, StatusBar, ActivityIndicator, Alert, Modal, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Send, Sparkles, Settings, Plus, X, Check, ScanLine } from 'lucide-react-native';
@@ -12,6 +13,7 @@ const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || "";
 
 const AIChatScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const flatListRef = useRef(null);
   const user = useSelector((state) => state.auth.user);
@@ -52,7 +54,7 @@ const AIChatScreen = ({ navigation }) => {
 
   const getWelcomeMessage = () => {
     const userName = user?.displayName || '';
-    return `Hello${userName ? ' ' + userName : ''}! I'm your AI Assistant. How can I help you today?`;
+    return t('ai_chat_screen.welcome_message', { userName });
   };
 
   const [messages, setMessages] = useState([
@@ -91,8 +93,8 @@ const AIChatScreen = ({ navigation }) => {
       if (index < fullText.length) {
         currentText += fullText.charAt(index);
         index++;
-        setMessages(prev => prev.map(msg => 
-          msg.id === messageId 
+        setMessages(prev => prev.map(msg =>
+          msg.id === messageId
             ? { ...msg, text: currentText }
             : msg
         ));
@@ -114,7 +116,7 @@ const AIChatScreen = ({ navigation }) => {
 
     // Simple check for placeholder
     if (API_KEY.includes("****")) {
-      Alert.alert("Configuration Error", "Please replace the API_KEY placeholder in the code with your actual OpenRouter key.");
+      Alert.alert(t('ai_chat_screen.error_config'), t('ai_chat_screen.error_api_key'));
       return;
     }
 
@@ -128,7 +130,7 @@ const AIChatScreen = ({ navigation }) => {
 
     // Simple check for placeholder
     if (provider.apiKey.includes("YOUR_") || provider.apiKey.includes("****")) {
-      Alert.alert("Configuration Error", `Please replace the API key placeholder for ${selectedProvider} in the code.`);
+      Alert.alert(t('ai_chat_screen.error_config'), t('ai_chat_screen.error_api_key'));
       setIsLoading(false);
       return;
     }
@@ -150,7 +152,7 @@ const AIChatScreen = ({ navigation }) => {
         body: JSON.stringify({
           "model": selectedModel,
           "messages": [
-            { "role": "system", "content": "You are a helpful, professional, and concise AI assistant integrated into a delivery application. Respond in a friendly application style." },
+            { "role": "system", "content": t('ai_chat_screen.system_prompt') },
             ...messages.slice(-10).map(m => ({
               role: m.sender === 'user' ? 'user' : 'assistant',
               content: m.text
@@ -179,8 +181,8 @@ const AIChatScreen = ({ navigation }) => {
 
     } catch (error) {
       console.error("AI Request Failed:", error);
-      Alert.alert("Error", `AI Request Failed: ${error.message}`);
-      setMessages(prev => [...prev, { id: Date.now().toString(), text: "Sorry, I encountered an error connecting to the AI. Please check your API key / internet connection.", sender: 'ai' }]);
+      Alert.alert(t('ai_chat_screen.error_generic'), `AI Request Failed: ${error.message}`);
+      setMessages(prev => [...prev, { id: Date.now().toString(), text: t('ai_chat_screen.error_connection'), sender: 'ai' }]);
     } finally {
       setIsLoading(false);
     }
@@ -221,7 +223,11 @@ const AIChatScreen = ({ navigation }) => {
         </View>
         {isFirstAIMessage && showChips && (
           <View style={styles.chipsContainer}>
-            {['Where is my order?', 'Change delivery address', 'I cut my finger'].map((text, chipIndex) => (
+            {[
+              t('ai_chat_screen.chips.order_status'),
+              t('ai_chat_screen.chips.change_address'),
+              t('ai_chat_screen.chips.cut_finger')
+            ].map((text, chipIndex) => (
               <TouchableOpacity key={chipIndex} onPress={() => handleChipPress(text)}>
                 <LinearGradient
                   colors={['#f8f9fa', '#e9ecef']}
@@ -248,7 +254,7 @@ const AIChatScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.headerTitleContainer}>
           <Sparkles size={24} color="#007AFF" style={{ marginRight: 8 }} />
-          <Text style={styles.headerTitle}>Delivery Chat</Text>
+          <Text style={styles.headerTitle}>{t('ai_chat_screen.header_title')}</Text>
         </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity onPress={startNewChat} style={styles.headerButton}>
@@ -284,7 +290,7 @@ const AIChatScreen = ({ navigation }) => {
               style={styles.input}
               value={input}
               onChangeText={setInput}
-              placeholder="Ask anything..."
+              placeholder={t('ai_chat_screen.input_placeholder')}
               placeholderTextColor="#999"
               multiline
             />
@@ -308,13 +314,13 @@ const AIChatScreen = ({ navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>AI Settings</Text>
+              <Text style={styles.modalTitle}>{t('ai_chat_screen.settings_title')}</Text>
               <TouchableOpacity onPress={() => setIsSettingsVisible(false)} style={styles.closeButton}>
                 <X size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.sectionTitle}>Provider</Text>
+            <Text style={styles.sectionTitle}>{t('ai_chat_screen.provider_label')}</Text>
             <View style={styles.providerContainer}>
               {Object.keys(PROVIDERS).map((providerName) => (
                 <TouchableOpacity
@@ -338,7 +344,7 @@ const AIChatScreen = ({ navigation }) => {
               ))}
             </View>
 
-            <Text style={styles.sectionTitle}>Model</Text>
+            <Text style={styles.sectionTitle}>{t('ai_chat_screen.model_label')}</Text>
             <View style={styles.modelList}>
               {PROVIDERS[selectedProvider].models.map((model) => (
                 <TouchableOpacity

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, Text, Dimensions } from 'react-native';
 import MapView, { Marker, Callout } from './MapViewWrapper';
 import * as Location from 'expo-location';
@@ -43,6 +44,7 @@ const SPECIFIC_LOCATIONS = [
 ];
 
 export const NearbyServices = ({ style }) => {
+    const { t } = useTranslation();
     const [location, setLocation] = useState(null);
     const [services, setServices] = useState(SPECIFIC_LOCATIONS);
     const [tracksViewChanges, setTracksViewChanges] = useState(true);
@@ -75,47 +77,47 @@ export const NearbyServices = ({ style }) => {
     return (
         <View style={[styles.container, style]}>
             <View style={styles.header}>
-                <Text style={styles.title}>Services Near You</Text>
+                <Text style={styles.title}>{t('home.services_near_you')}</Text>
                 <View style={styles.badge}>
                     <View style={styles.dot} />
-                    <Text style={styles.badgeText}>Nearby</Text>
+                    <Text style={styles.badgeText}>{t('home.nearby_badge')}</Text>
                 </View>
             </View>
             <View style={styles.mapContainer}>
                 {location && (
-                <MapView
-                    style={styles.map}
-                    initialRegion={{
-                        ...location,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                    }}
-                    customMapStyle={lightMapStyle}
-                    showsUserLocation={true}
-                    scrollEnabled={true}
-                    zoomEnabled={true}
-                    pitchEnabled={false}
-                    rotateEnabled={false}
-                >
-                    {services.map(service => {
-                        const IconComponent = service.icon;
-                        return (
-                            <Marker
-                                key={service.id}
-                                coordinate={{ latitude: service.latitude, longitude: service.longitude }}
-                                title={service.name}
-                                description={service.type}
-                                tracksViewChanges={tracksViewChanges}
-                            >
-                                <View style={styles.markerWrapper}>
-                                    <View style={[styles.markerInner, { backgroundColor: service.color }]}>
-                                        <IconComponent size={14} color="#fff" />
+                    <MapView
+                        style={styles.map}
+                        initialRegion={{
+                            ...location,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
+                        customMapStyle={lightMapStyle}
+                        showsUserLocation={true}
+                        scrollEnabled={true}
+                        zoomEnabled={true}
+                        pitchEnabled={false}
+                        rotateEnabled={false}
+                    >
+                        {services.map(service => {
+                            const IconComponent = service.icon;
+                            return (
+                                <Marker
+                                    key={service.id}
+                                    coordinate={{ latitude: service.latitude, longitude: service.longitude }}
+                                    title={service.name}
+                                    description={service.type}
+                                    tracksViewChanges={tracksViewChanges}
+                                >
+                                    <View style={styles.markerWrapper}>
+                                        <View style={[styles.markerInner, { backgroundColor: service.color }]}>
+                                            <IconComponent size={14} color="#fff" />
+                                        </View>
                                     </View>
-                                </View>
-                            </Marker>
-                        );
-                    })}
-                </MapView>
+                                </Marker>
+                            );
+                        })}
+                    </MapView>
                 )}
             </View>
         </View>

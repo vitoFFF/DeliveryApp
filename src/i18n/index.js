@@ -27,7 +27,8 @@ const LANGUAGE_DETECTOR = {
 
         // Fallback to device locale
         const deviceLanguage = Localization.getLocales()[0].languageCode;
-        callback(deviceLanguage);
+        // Default to Georgian if no language is saved
+        callback('ka');
     },
     init: () => { },
     cacheUserLanguage: async (language) => {
@@ -44,7 +45,7 @@ i18n
     .use(initReactI18next)
     .init({
         resources: RESOURCES,
-        fallbackLng: 'en',
+        fallbackLng: 'ka',
         interpolation: {
             escapeValue: false,
         },

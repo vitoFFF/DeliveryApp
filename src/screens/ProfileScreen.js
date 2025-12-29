@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { logoutUser } from '../store/authSlice';
 import { theme } from '../utils/theme';
 import { seedSupabase } from '../utils/seedSupabase';
+import LanguageSelector from '../components/LanguageSelector';
 
 export const ProfileScreen = () => {
     const { t } = useTranslation();
@@ -80,6 +81,9 @@ export const ProfileScreen = () => {
 
                 <List.Section>
                     <List.Subheader>{t('profile.settings')}</List.Subheader>
+                    <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+                        <LanguageSelector />
+                    </View>
                     <List.Item
                         title={t('profile.payment_methods')}
                         left={(props) => <List.Icon {...props} icon="credit-card" />}

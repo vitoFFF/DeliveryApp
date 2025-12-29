@@ -163,7 +163,7 @@ export const HomeScreen = ({ navigation }) => {
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         onFilterPress={() => setShowFilterModal(true)}
-                        onImageSearchPress={() => {}}
+                        onImageSearchPress={() => { }}
                     />
                     <View style={{ paddingHorizontal: 16 }}>
                         {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
@@ -201,7 +201,7 @@ export const HomeScreen = ({ navigation }) => {
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                             onFilterPress={() => setShowFilterModal(true)}
-                            onImageSearchPress={() => {}}
+                            onImageSearchPress={() => { }}
                         />
                         <FilterChips
                             filters={filters}
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingTop: 6,
-        paddingBottom: theme.spacing.xl * 2,
+        paddingBottom: theme.spacing.xl * 4, // Increased padding to clear the floating tab bar
         gap: 4,
     },
     horizontalCard: {

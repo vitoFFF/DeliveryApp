@@ -11,6 +11,8 @@ import { theme } from '../utils/theme';
 import { Text as RNText } from 'react-native';
 import { Home, MessageSquare, LifeBuoy, Sparkles } from 'lucide-react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 const { width } = Dimensions.get('window');
 
 const TabBarShape = () => {
@@ -61,6 +63,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const rotation = useSharedValue(0);
     const menuProgress = useSharedValue(0);
+    const insets = useSafeAreaInsets();
 
     const toggleMenu = () => {
         const toValue = isMenuOpen ? 0 : 1;
@@ -111,7 +114,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
                     />
                     <View style={[StyleSheet.absoluteFill, styles.backdropTint]} />
                 </Pressable>
-                <View style={styles.menuContainer}>
+                <View style={[styles.menuContainer, { bottom: 55 + insets.bottom + 24 }]}>
                     {menuItems.map((item, index) => {
                         const angle = -45 - (index * 45);
                         const animatedStyle = useAnimatedStyle(() => {
@@ -153,7 +156,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
 
             </Modal>
 
-            <View style={styles.container}>
+            <View style={[styles.container, { bottom: Math.max(insets.bottom, 16) }]}>
                 <TabBarShape />
                 <View style={styles.tabBarContainer}>
                     {state.routes.map((route, index) => {
@@ -260,7 +263,6 @@ const TabBarButton = ({ onPress, onLongPress, isFocused, options, routeName, rot
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: 24,
         left: 10,
         right: 10,
         height: 80,
