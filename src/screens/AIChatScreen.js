@@ -208,7 +208,17 @@ const AIChatScreen = ({ navigation }) => {
               </LinearGradient>
             </View>
           )}
-          <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
+          <View style={[
+            styles.messageBubble,
+            isUser ? styles.userBubble : styles.aiBubble,
+            isFirstAIMessage && styles.welcomeBubble
+          ]}>
+            {!isUser && isFirstAIMessage && (
+              <LinearGradient
+                colors={['#F8FAFC', '#F1F5F9']}
+                style={StyleSheet.absoluteFillObject}
+              />
+            )}
             {isUser && (
               <LinearGradient
                 colors={['#007AFF', '#00C6FF']}
@@ -226,17 +236,22 @@ const AIChatScreen = ({ navigation }) => {
             {[
               t('ai_chat_screen.chips.order_status'),
               t('ai_chat_screen.chips.change_address'),
-              t('ai_chat_screen.chips.cut_finger')
+              t('ai_chat_screen.chips.cut_finger'),
+              t('ai_chat_screen.chips.hungry'),
+              t('ai_chat_screen.chips.drink'),
+              t('ai_chat_screen.chips.recommend')
             ].map((text, chipIndex) => (
-              <TouchableOpacity key={chipIndex} onPress={() => handleChipPress(text)}>
-                <LinearGradient
-                  colors={['#f8f9fa', '#e9ecef']}
-                  style={styles.chip}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
+              <TouchableOpacity
+                key={chipIndex}
+                onPress={() => handleChipPress(text)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.chip}>
+                  <View style={styles.chipIconContainer}>
+                    <Sparkles size={12} color="#007AFF" />
+                  </View>
                   <Text style={styles.chipText}>{text}</Text>
-                </LinearGradient>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -251,20 +266,33 @@ const AIChatScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" />
-      <View style={styles.header}>
-        <View style={styles.headerTitleContainer}>
-          <Sparkles size={24} color="#007AFF" style={{ marginRight: 8 }} />
-          <Text style={styles.headerTitle}>{t('ai_chat_screen.header_title')}</Text>
+      <BlurView intensity={80} tint="light" style={styles.headerBlur}>
+        <View style={styles.header}>
+          <View style={styles.headerTitleContainer}>
+            <LinearGradient
+              colors={['#007AFF', '#00C6FF']}
+              style={styles.headerIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Sparkles size={16} color="#fff" />
+            </LinearGradient>
+            <Text style={styles.headerTitle}>{t('ai_chat_screen.header_title')}</Text>
+          </View>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity onPress={startNewChat} style={styles.headerButton}>
+              <View style={styles.iconCircle}>
+                <Plus size={20} color="#007AFF" />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsSettingsVisible(true)} style={styles.headerButton}>
+              <View style={styles.iconCircle}>
+                <Settings size={20} color="#64748B" />
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity onPress={startNewChat} style={styles.headerButton}>
-            <Plus size={22} color="#007AFF" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsSettingsVisible(true)} style={styles.headerButton}>
-            <Settings size={22} color="#333" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      </BlurView>
 
       <FlatList
         ref={flatListRef}
@@ -286,20 +314,33 @@ const AIChatScreen = ({ navigation }) => {
           { paddingBottom: bottomPadding }
         ]}>
           <View style={styles.inputContainer}>
+            <View style={styles.inputPrefix}>
+              <Sparkles size={18} color="#007AFF" opacity={0.6} />
+            </View>
             <TextInput
               style={styles.input}
               value={input}
               onChangeText={setInput}
               placeholder={t('ai_chat_screen.input_placeholder')}
-              placeholderTextColor="#999"
+              placeholderTextColor="#94A3B8"
               multiline
             />
             <TouchableOpacity
-              style={[styles.sendButton, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
               onPress={sendMessage}
               disabled={!input.trim() || isLoading}
             >
-              {isLoading ? <ActivityIndicator size="small" color="#fff" /> : <Send size={20} color="#fff" />}
+              <LinearGradient
+                colors={(!input.trim() || isLoading) ? ['#CBD5E1', '#94A3B8'] : ['#007AFF', '#00C6FF']}
+                style={[styles.sendButton, (!input.trim() || isLoading) && styles.sendButtonDisabled]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Send size={18} color="#fff" />
+                )}
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>
@@ -391,25 +432,43 @@ const styles = StyleSheet.create({
     borderTopColor: '#f0f0f0',
     backgroundColor: '#fff',
   },
+  headerBlur: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(226, 232, 240, 0.8)',
+  },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  },
+  headerIconGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
   },
   headerTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
-    letterSpacing: 0.5,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.5,
+  },
+  iconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chatList: {
     padding: 20,
@@ -472,44 +531,68 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   aiMessageText: {
-    color: '#0F172A',
+    color: '#1E293B',
     fontWeight: '500',
     lineHeight: 24,
   },
+  welcomeBubble: {
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#fff',
+    shadowColor: '#64748B',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+    padding: 18,
+  },
   inputWrapper: {
-    // padding is added dynamically via style prop
-    padding: 10,
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
   inputContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 24,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 28,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#e1e4e8',
+    borderColor: '#E2E8F0',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  inputPrefix: {
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
-    maxHeight: 100,
-    paddingTop: 8,
-    paddingBottom: 8,
+    color: '#1E293B',
+    maxHeight: 120,
+    paddingTop: 0,
+    paddingBottom: 0,
+    fontWeight: '400',
   },
   sendButton: {
-    marginLeft: 10,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#007AFF',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 2,
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sendButtonDisabled: {
-    backgroundColor: '#ccc',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   headerButtons: {
     flexDirection: 'row',
@@ -622,25 +705,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    gap: 10,
+    paddingVertical: 12,
+    gap: 12,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 10,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#e1e4e8',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderColor: '#F1F5F9',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  chipIconContainer: {
+    marginRight: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    backgroundColor: '#F0F9FF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chipText: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
+    fontSize: 13,
+    color: '#334155',
+    fontWeight: '600',
+    letterSpacing: -0.2,
   }
 });
 

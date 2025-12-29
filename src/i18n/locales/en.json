@@ -115,7 +115,10 @@
         "chips": {
             "order_status": "Where is my order?",
             "change_address": "Change delivery address",
-            "cut_finger": "I cut my finger"
+            "cut_finger": "I cut my finger",
+            "hungry": "Dinner under 15 GEL",
+            "drink": "I want a drink",
+            "recommend": "Something light"
         },
         "input_placeholder": "Ask anything...",
         "error_config": "Configuration Error",
