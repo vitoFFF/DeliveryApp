@@ -110,7 +110,7 @@
     },
     "ai_chat_screen": {
         "header_title": "Delivery Chat",
-        "welcome_message": "Hello {{userName}}! I'm your AI Assistant. How can I help you today?",
+        "welcome_message": "Hello! I'm your AI Assistant. How can I help you today?",
         "system_prompt": "You are a helpful, professional, and concise AI assistant integrated into a delivery application. Respond in a friendly application style.",
         "chips": {
             "order_status": "Where is my order?",
@@ -127,7 +127,9 @@
         "error_connection": "Sorry, I encountered an error connecting to the AI. Please check your internet connection.",
         "settings_title": "AI Settings",
         "provider_label": "Provider",
-        "model_label": "Model"
+        "model_label": "Model",
+        "quick_suggestions": "Quick Suggestions",
+        "tap_to_ask": "Tap to ask"
     },
     "header": {
         "deliver_to": "Deliver to",

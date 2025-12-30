@@ -1,16 +1,438 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, StatusBar, ActivityIndicator, Alert, Modal, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, StatusBar, ActivityIndicator, Alert, Modal, Pressable, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Send, Sparkles, Settings, Plus, X, Check, ScanLine } from 'lucide-react-native';
+import { Send, Sparkles, Settings, Plus, X, Check, ScanLine, Package, MapPin, Bandage, Utensils, Coffee, Star, ChevronRight } from 'lucide-react-native';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 // REPLACE WITH YOUR ACTUAL KEY
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || "";
+
+// Chip configurations with icons and gradients
+const CHIP_CONFIGS = [
+  {
+    key: 'order_status',
+    icon: Package,
+    gradient: ['#667eea', '#764ba2'],
+    emoji: '📦'
+  },
+  {
+    key: 'change_address',
+    icon: MapPin,
+    gradient: ['#f093fb', '#f5576c'],
+    emoji: '📍'
+  },
+  {
+    key: 'cut_finger',
+    icon: Bandage,
+    gradient: ['#4facfe', '#00f2fe'],
+    emoji: '🩹'
+  },
+  {
+    key: 'hungry',
+    icon: Utensils,
+    gradient: ['#fa709a', '#fee140'],
+    emoji: '🍽️'
+  },
+  {
+    key: 'drink',
+    icon: Coffee,
+    gradient: ['#a8edea', '#fed6e3'],
+    emoji: '☕'
+  },
+  {
+    key: 'recommend',
+    icon: Star,
+    gradient: ['#ffecd2', '#fcb69f'],
+    emoji: '⭐'
+  },
+];
+
+// Constants for wheel carousel
+const ITEM_HEIGHT = 72;
+const VISIBLE_ITEMS = 5;
+const CAROUSEL_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
+
+// Premium 3D Wheel Carousel Component
+const VerticalChipsCarousel = ({ t, onChipPress }) => {
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef(null);
+
+  const scaleValues = useRef(
+    CHIP_CONFIGS.map(() => new Animated.Value(1))
+  ).current;
+
+  // Set initial scroll position to center the middle chip
+  useEffect(() => {
+    // Calculate middle index (for 6 items: index 2 or 3)
+    const middleIndex = Math.floor(CHIP_CONFIGS.length / 2);
+    const initialScrollY = middleIndex * ITEM_HEIGHT;
+
+    // Set initial animated value
+    scrollY.setValue(initialScrollY);
+
+    // Scroll to middle after a brief delay to ensure layout is ready
+    const timeout = setTimeout(() => {
+      scrollViewRef.current?.scrollTo({
+        y: initialScrollY,
+        animated: false,
+      });
+    }, 50);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handlePressIn = (index) => {
+    Animated.spring(scaleValues[index], {
+      toValue: 0.92,
+      useNativeDriver: true,
+      friction: 6,
+      tension: 100,
+    }).start();
+  };
+
+  const handlePressOut = (index) => {
+    Animated.spring(scaleValues[index], {
+      toValue: 1,
+      useNativeDriver: true,
+      friction: 6,
+      tension: 100,
+    }).start();
+  };
+
+  const handlePress = (text, index) => {
+    // Haptic-like visual feedback
+    Animated.sequence([
+      Animated.timing(scaleValues[index], {
+        toValue: 0.88,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleValues[index], {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 4,
+        tension: 200,
+      }),
+    ]).start(() => {
+      onChipPress(text);
+    });
+  };
+
+  const renderChip = (config, index) => {
+    const IconComponent = config.icon;
+    const chipText = t(`ai_chat_screen.chips.${config.key}`);
+
+    // Calculate 3D wheel transformations
+    const inputRange = [
+      (index - 2) * ITEM_HEIGHT,
+      (index - 1) * ITEM_HEIGHT,
+      index * ITEM_HEIGHT,
+      (index + 1) * ITEM_HEIGHT,
+      (index + 2) * ITEM_HEIGHT,
+    ];
+
+    const scale = scrollY.interpolate({
+      inputRange,
+      outputRange: [0.7, 0.85, 1, 0.85, 0.7],
+      extrapolate: 'clamp',
+    });
+
+    const opacity = scrollY.interpolate({
+      inputRange,
+      outputRange: [0.3, 0.6, 1, 0.6, 0.3],
+      extrapolate: 'clamp',
+    });
+
+    const translateX = scrollY.interpolate({
+      inputRange,
+      outputRange: [30, 12, 0, 12, 30],
+      extrapolate: 'clamp',
+    });
+
+    const rotateX = scrollY.interpolate({
+      inputRange,
+      outputRange: ['-25deg', '-12deg', '0deg', '12deg', '25deg'],
+      extrapolate: 'clamp',
+    });
+
+    const focusOpacity = scrollY.interpolate({
+      inputRange,
+      outputRange: [0, 0.2, 1, 0.2, 0],
+      extrapolate: 'clamp',
+    });
+
+    const activeBorderColor = scrollY.interpolate({
+      inputRange,
+      outputRange: ['rgba(226, 232, 240, 0)', 'rgba(226, 232, 240, 0.3)', 'rgba(99, 102, 241, 0.5)', 'rgba(226, 232, 240, 0.3)', 'rgba(226, 232, 240, 0)'],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Animated.View
+        key={config.key}
+        style={[
+          carouselStyles.chipOuter,
+          {
+            height: ITEM_HEIGHT,
+            opacity,
+            transform: [
+              { perspective: 800 },
+              { scale: Animated.multiply(scale, scaleValues[index]) },
+              { translateX },
+              { rotateX },
+            ],
+          },
+        ]}
+      >
+        <TouchableOpacity
+          activeOpacity={0.95}
+          onPressIn={() => handlePressIn(index)}
+          onPressOut={() => handlePressOut(index)}
+          onPress={() => handlePress(chipText, index)}
+          style={carouselStyles.chipTouchable}
+        >
+          <Animated.View style={[carouselStyles.chipCard, { borderColor: activeBorderColor }]}>
+            {/* Minimalist Premium active glow */}
+            <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: focusOpacity }]}>
+              <LinearGradient
+                colors={['rgba(255, 255, 255, 0.6)', 'rgba(99, 102, 241, 0.05)', 'rgba(255, 255, 255, 0.6)']}
+                style={StyleSheet.absoluteFillObject}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              />
+            </Animated.View>
+
+            {/* Glowing gradient background base */}
+            <LinearGradient
+              colors={[...config.gradient, 'rgba(255,255,255,0.9)']}
+              style={carouselStyles.glowBg}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            />
+
+            {/* Inner card with glassmorphism */}
+            <View style={carouselStyles.innerCard}>
+              {/* Gradient accent bar */}
+              <LinearGradient
+                colors={config.gradient}
+                style={carouselStyles.accentBar}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+              />
+
+              {/* Icon container with gradient */}
+              <View style={carouselStyles.iconWrapper}>
+                <LinearGradient
+                  colors={config.gradient}
+                  style={carouselStyles.iconGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <IconComponent size={20} color="#fff" strokeWidth={2.5} />
+                </LinearGradient>
+              </View>
+
+              {/* Text content */}
+              <View style={carouselStyles.textContainer}>
+                <Text style={carouselStyles.chipTitle} numberOfLines={1}>
+                  {chipText}
+                </Text>
+              </View>
+            </View>
+
+            {/* Refined Active Highlights (Minimalist) */}
+            <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: focusOpacity }]} pointerEvents="none">
+              <LinearGradient
+                colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.8)', 'rgba(255,255,255,0)']}
+                style={carouselStyles.focusHighlightTop}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              />
+            </Animated.View>
+          </Animated.View>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
+  return (
+    <View style={carouselStyles.container}>
+      {/* Top fade gradient */}
+      <LinearGradient
+        colors={['#fff', 'rgba(255,255,255,0)']}
+        style={carouselStyles.fadeTop}
+        pointerEvents="none"
+      />
+
+      <Animated.ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={ITEM_HEIGHT}
+        decelerationRate={Platform.OS === 'ios' ? 0.92 : 0.89}
+        nestedScrollEnabled={true}
+        scrollEnabled={true}
+        bounces={true}
+        overScrollMode="always"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={8}
+        contentContainerStyle={carouselStyles.scrollContent}
+        style={{ height: CAROUSEL_HEIGHT }}
+      >
+        {/* Top padding for centering */}
+        <View style={{ height: ITEM_HEIGHT * 2 }} />
+
+        {CHIP_CONFIGS.map((config, index) => renderChip(config, index))}
+
+        {/* Bottom padding for centering */}
+        <View style={{ height: ITEM_HEIGHT * 2 }} />
+      </Animated.ScrollView>
+
+      {/* Bottom fade gradient */}
+      <LinearGradient
+        colors={['rgba(255,255,255,0)', '#fff']}
+        style={carouselStyles.fadeBottom}
+        pointerEvents="none"
+      />
+    </View>
+  );
+};
+
+// Carousel-specific styles
+const carouselStyles = StyleSheet.create({
+  container: {
+    marginTop: 12,
+    marginHorizontal: 4,
+    position: 'relative',
+  },
+  scrollContent: {
+    paddingHorizontal: 8,
+  },
+  fadeTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    zIndex: 10,
+  },
+  fadeBottom: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    zIndex: 10,
+  },
+  focusIndicator: {
+    position: 'absolute',
+    top: ITEM_HEIGHT * 2,
+    left: 4,
+    right: 4,
+    height: ITEM_HEIGHT,
+    borderRadius: 22,
+    overflow: 'hidden',
+    zIndex: 5,
+  },
+  focusGradient: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  focusHighlightTop: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 1,
+  },
+  chipOuter: {
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  chipTouchable: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  chipCard: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 3,
+    marginVertical: 4,
+  },
+  glowBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 18,
+    opacity: 0.15,
+  },
+  innerCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingRight: 12,
+    paddingLeft: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.9)',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
+    overflow: 'hidden',
+  },
+  accentBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  iconWrapper: {
+    marginLeft: 12,
+    marginRight: 14,
+  },
+  iconGradient: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  textContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  chipTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1E293B',
+    letterSpacing: -0.3,
+  },
+});
 
 const AIChatScreen = ({ navigation }) => {
   const { t } = useTranslation();
@@ -53,12 +475,11 @@ const AIChatScreen = ({ navigation }) => {
   };
 
   const getWelcomeMessage = () => {
-    const userName = user?.displayName || '';
-    return t('ai_chat_screen.welcome_message', { userName });
+    return t('ai_chat_screen.welcome_message');
   };
 
   const [messages, setMessages] = useState([
-    { id: '1', text: getWelcomeMessage(), sender: 'ai' }
+    { id: 'welcome-message', text: getWelcomeMessage(), sender: 'ai' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,14 +492,14 @@ const AIChatScreen = ({ navigation }) => {
 
   const startNewChat = () => {
     setMessages([
-      { id: Date.now().toString(), text: getWelcomeMessage(), sender: 'ai' }
+      { id: 'welcome-message', text: getWelcomeMessage(), sender: 'ai' }
     ]);
     setShowChips(true);
   };
 
   const handleChipPress = (text) => {
     setInput(text);
-    sendMessage();
+    sendMessage(text);
   };
 
   const animateText = (fullText, messageId) => {
@@ -111,8 +532,10 @@ const AIChatScreen = ({ navigation }) => {
     };
   }, []);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const sendMessage = async (textOverride = null) => {
+    const messageText = typeof textOverride === 'string' ? textOverride : input;
+
+    if (!messageText.trim()) return;
 
     // Simple check for placeholder
     if (API_KEY.includes("****")) {
@@ -120,8 +543,14 @@ const AIChatScreen = ({ navigation }) => {
       return;
     }
 
-    const userMessage = { id: Date.now().toString(), text: input, sender: 'user' };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = { id: Date.now().toString(), text: messageText, sender: 'user' };
+    setMessages(prev => {
+      // Remove welcome message if it's the only message present
+      if (prev.length === 1 && prev[0].id === 'welcome-message') {
+        return [userMessage];
+      }
+      return [...prev, userMessage];
+    });
     setInput('');
     setShowChips(false);
     setIsLoading(true);
@@ -232,29 +661,10 @@ const AIChatScreen = ({ navigation }) => {
           </View>
         </View>
         {isFirstAIMessage && showChips && (
-          <View style={styles.chipsContainer}>
-            {[
-              t('ai_chat_screen.chips.order_status'),
-              t('ai_chat_screen.chips.change_address'),
-              t('ai_chat_screen.chips.cut_finger'),
-              t('ai_chat_screen.chips.hungry'),
-              t('ai_chat_screen.chips.drink'),
-              t('ai_chat_screen.chips.recommend')
-            ].map((text, chipIndex) => (
-              <TouchableOpacity
-                key={chipIndex}
-                onPress={() => handleChipPress(text)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.chip}>
-                  <View style={styles.chipIconContainer}>
-                    <Sparkles size={12} color="#007AFF" />
-                  </View>
-                  <Text style={styles.chipText}>{text}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <VerticalChipsCarousel
+            t={t}
+            onChipPress={handleChipPress}
+          />
         )}
       </View>
     );
