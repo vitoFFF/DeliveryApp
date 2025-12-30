@@ -12,7 +12,8 @@
         "edit": "Edit",
         "close": "Close",
         "confirm": "Confirm",
-        "total": "Total"
+        "total": "Total",
+        "offline_mode": "Offline Mode"
     },
     "profile": {
         "title": "Profile",

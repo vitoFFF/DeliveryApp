@@ -35,7 +35,7 @@ export const HomeScreen = ({ navigation }) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedFilter, setSelectedFilter] = useState(null);
     const [showFilterModal, setShowFilterModal] = useState(false);
-    const { categories, venues, products, loading, error } = useFirebaseData();
+    const { categories, venues, products, loading, error, isOffline } = useFirebaseData();
     const { width: screenWidth } = useWindowDimensions();
     const dispatch = useDispatch();
 
@@ -203,6 +203,12 @@ export const HomeScreen = ({ navigation }) => {
                             onFilterPress={() => setShowFilterModal(true)}
                             onImageSearchPress={() => { }}
                         />
+                        {/* Offline Indicator */}
+                        {isOffline && (
+                            <View style={styles.offlineBanner}>
+                                <Text style={styles.offlineText}>{t('common.offline_mode')}</Text>
+                            </View>
+                        )}
                         <FilterChips
                             filters={filters}
                             selectedFilter={selectedFilter}
@@ -382,6 +388,19 @@ const styles = StyleSheet.create({
     },
     addBtn: {
         marginTop: 8,
+    },
+    offlineBanner: {
+        backgroundColor: '#FFE0E0',
+        paddingVertical: 4,
+        paddingHorizontal: 12,
+        borderRadius: 16,
+        alignSelf: 'center',
+        marginBottom: 8,
+    },
+    offlineText: {
+        color: '#D32F2F',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
 });
 

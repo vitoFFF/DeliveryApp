@@ -12,12 +12,14 @@ export const useFirebaseData = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isOffline, setIsOffline] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
                 setError(null);
+                setIsOffline(false);
 
                 const [catRes, venRes, prodRes] = await Promise.all([
                     supabase.from('categories').select('*').order('name'),
@@ -29,28 +31,35 @@ export const useFirebaseData = () => {
                 if (venRes.error) throw venRes.error;
                 if (prodRes.error) throw prodRes.error;
 
-                // Transform Venues: Ensure categories array is correct
-                // Supabase might return it as a string if text[], but JS client handles array types usually.
-                // However, our SQL defined it as TEXT[], so it should be fine.
-                // Just in case, we map to ensure structure consistency if needed.
                 const formattedVenues = venRes.data.map(v => ({
                     ...v,
-                    categoryId: v.category_id, // Map snake_case to camelCase specific for app usage if needed
+                    categoryId: v.category_id,
                     deliveryTime: v.delivery_time,
                     priceRange: v.price_range
                 }));
 
                 const formattedProducts = prodRes.data.map(p => ({
                     ...p,
-                    restaurantId: p.restaurant_id // Map snake_case to camelCase
+                    restaurantId: p.restaurant_id
                 }));
 
                 setCategories(catRes.data);
                 setVenues(formattedVenues);
                 setProducts(formattedProducts);
             } catch (err) {
-                console.error('Data Fetch Error:', err.message);
-                setError(err.message);
+                console.warn('Network request failed, falling back to mock data:', err.message);
+
+                // Fallback to mock data
+                // Note: mockProducts is already imported as products in this file
+                // We need to import the rest of mock data
+                const { categories: mockCategories, venues: mockVenues, products: mockProductsData } = require('../data/mockData');
+
+                setCategories(mockCategories);
+                setVenues(mockVenues);
+                setProducts(mockProductsData);
+                setIsOffline(true);
+                // Clear error since we've fallen back successfully
+                setError(null);
             } finally {
                 setLoading(false);
             }
@@ -64,7 +73,8 @@ export const useFirebaseData = () => {
         venues,
         products,
         loading,
-        error
+        error,
+        isOffline
     };
 };
 
