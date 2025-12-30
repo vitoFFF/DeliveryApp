@@ -3,7 +3,7 @@
     "cli": {
       "appVersionSource": "remote"
     },
-    "name": "Electron",
+    "name": "G-Pulse",
     "slug": "DeliveryApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,7 +21,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow DeliveryApp to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow G-Pulse to use your location."
         }
       ],
       "expo-splash-screen"
@@ -38,7 +38,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.deliveryapp.app",
+      "package": "com.gpulse.app",
+      "versionCode": 1,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
